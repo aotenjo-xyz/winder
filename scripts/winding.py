@@ -373,7 +373,6 @@ class Wind:
 		starts_at = self.config['winding']['starts_at']
 		start_slot_idx = slot_indices[wire_idx][starts_at]
 		self.move_to_slot(start_slot_idx)
-		# sleep(15)
 		sleep(1)
 
 		if self.is_starting_from_bottom(starts_at, wire_idx):
@@ -386,19 +385,12 @@ class Wind:
 				self.prevent_collision()
 				sleep(0.5)
 
-				# self.logger.info('Motor2 position set')
-				# self.logger.debug(self.motor2_pos)
-				# sleep(30)
-
 				self.move_motor(0, self.m1_rotating_position)
 				
 			clockwise = wind_order[i]
 			slot_idx = slot_indices[wire_idx][i]
 
 			self.wind_slot(slot_idx, clockwise, i)
-			# if i == 1:
-			# 	# after winding two slots, winding is done
-			# 	break
 		
 		# Back to zero
 		self.move_motor(0, self.m0_zero)

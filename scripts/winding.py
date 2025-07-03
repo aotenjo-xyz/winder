@@ -42,9 +42,9 @@ class Wind:
 		self.m1_rotating_position = self.config['motor']['M1']['end_to_rotating_position'] + self.m0_wind_range[1]
 		self.m2_angle_to_prevent_collision = self.config['motor']['M2']['angle_to_prevent_collision']
 		# step distance ratio
-		# core:outer = 2:1 
-		self.core_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 3 * 1)
-		self.outer_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 3 * 2)
+		# core:outer = 3:2 
+		self.core_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 5 * 2)
+		self.outer_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 5 * 3)
 
 	def check_motor_direction(self, motor_id, target):
 		rotating_direction = rotating_directions[motor_id]

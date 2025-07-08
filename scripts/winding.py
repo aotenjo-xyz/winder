@@ -29,9 +29,7 @@ class Wind:
 		self.ser = serial.Serial(port, baudrate)
 		self.logger = init_logger()
 
-		self.batch_size = self.config['winding']['batch_size']
 		self.turns_per_slot = self.config['winding']['turns_per_slot']
-		self.move_count = self.turns_per_slot // self.batch_size
 		self.slot_pairs = self.config['winding']['slot_pairs']
 
 		self.m0_wind_range = (self.config['motor']['M0']['wind_range_start'], self.config['motor']['M0']['wind_range_end'])
@@ -41,10 +39,6 @@ class Wind:
 
 		self.m1_rotating_position = self.config['motor']['M1']['end_to_rotating_position'] + self.m0_wind_range[1]
 		self.m2_angle_to_prevent_collision = self.config['motor']['M2']['angle_to_prevent_collision']
-		# step distance ratio
-		# core:outer = 3:2 
-		self.core_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 5 * 2)
-		self.outer_move_step = abs(self.m0_wind_range[1] - self.m0_wind_range[0]) / (self.move_count / 5 * 3)
 
 	def check_motor_direction(self, motor_id, target):
 		rotating_direction = rotating_directions[motor_id]
@@ -226,19 +220,14 @@ class Wind:
 			self.move_motor(2, self.motor_positions[2] - self.m2_angle_to_prevent_collision)
 			self.motor2_pos = Motor2State.BOTTOM_RIGHT
 
-	def get_motor0_target_winding_position(self, idx):
-		# core:outer = 3:2
-		closer_to_core = abs(self.m0_wind_range[0] - self.motor_positions[0]) < abs(self.m0_wind_range[1] - self.motor_positions[0])
-		is_turning_back = self.turns_per_slot // self.batch_size // 2 <= idx
-		if closer_to_core and not is_turning_back:
-			# first half of the winding
-			motor0_target = self.motor_positions[0] + self.core_move_step
-		elif not closer_to_core and not is_turning_back:
-			motor0_target = self.motor_positions[0] + self.outer_move_step
-		elif closer_to_core and is_turning_back:
-			motor0_target = self.motor_positions[0] - self.core_move_step
+	def get_motor0_target_winding_position(self, motor2_total_mileage, current_motor2_mileage):
+		wind_range_distance = abs(self.m0_wind_range[1] - self.m0_wind_range[0])
+		target_motor0_mileage = wind_range_distance * 2 / motor2_total_mileage * current_motor2_mileage
+		if target_motor0_mileage < wind_range_distance:
+			motor0_target = self.m0_wind_range[0] + target_motor0_mileage
 		else:
-			motor0_target = self.motor_positions[0] - self.outer_move_step
+			motor0_target = self.m0_wind_range[1] - (target_motor0_mileage - wind_range_distance)
+		assert self.m0_wind_range[0] <= motor0_target <= self.m0_wind_range[1], f'motor0_target: {motor0_target} is out of range {self.m0_wind_range}'
 		return motor0_target
 
 	def prevent_collision(self):
@@ -295,15 +284,18 @@ class Wind:
 		self.fast_winding(clockwise)
 		self.move_motor(2, target_motor2_pos)
 
-		for i in range(self.move_count):
-			while True:
-				motor2_pos = self.get_motor_position(2)
-				# after batch_size rotations, move motor0 by motor0_step
-				sleep(0.05)
-				if abs(motor2_pos - init_motor2_pos) >= math.pi * 2 * self.batch_size * (i + 1) - 0.01: # 0.01 is to avoid floating point error
-					if i != self.move_count - 1:
-						self.move_motor(0, self.get_motor0_target_winding_position(i))
-					break
+		prev_motor2_pos = init_motor2_pos
+		k = 1.0
+		while True:
+			motor2_pos = self.get_motor_position(2)
+			sleep(0.05)
+			if abs(motor2_pos - prev_motor2_pos) >= math.pi * k - 0.01: # 0.01 is to avoid floating point error
+				if not abs(motor2_pos - target_motor2_pos) < math.pi * 2:
+					target_motor0_pos = self.get_motor0_target_winding_position(abs(target_motor2_pos - init_motor2_pos), abs(motor2_pos - init_motor2_pos))
+					self.move_motor(0, target_motor0_pos)
+					prev_motor2_pos = motor2_pos
+					continue
+				break
 
 		sleep(1)
 		motor2_pos = self.get_motor_position(2)

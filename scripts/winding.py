@@ -288,7 +288,7 @@ class Wind:
 
 		target_motor2_pos = self.get_target_motor2_pos(clockwise, wind_idx)
 		self.slow_winding(clockwise)
-		self.fast_winding(clockwise)
+		# self.fast_winding(clockwise)
 		self.move_motor(2, target_motor2_pos)
 
 		prev_motor2_pos = init_motor2_pos
@@ -311,8 +311,9 @@ class Wind:
 		self.logger.info(f'Winding slot {slot_idx} done')
 
 		# move motor 2 to the left to prevent collision
-		self.prevent_collision()
-
+		skip_prevent_collision_slot_idx = [3, 11, 15, 19, 23]
+		if slot_idx not in skip_prevent_collision_slot_idx:
+			self.prevent_collision()
 		sleep(0.5)
 
 		self.move_motor(0, self.m1_rotating_position)

@@ -10,10 +10,10 @@ motor:
     wind_range_start: -23
     end_to_zero: 6.0
   M1:
-    zero: 0.02
+    zero: 0.03
     end_to_rotating_position: 6.0
   M2:
-    zero: 0.2
+    zero: 2.3
     angle_to_prevent_collision: 1.0
   M3:
     zero: 0.0
@@ -26,7 +26,7 @@ winding:
   # production
   turns_per_slot: 75
   starts_at: 0
-  batch_size: 2 # how many steps to take before moving the motor0
+  dont_move_m3: true
   
 
 

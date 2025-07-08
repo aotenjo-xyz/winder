@@ -40,6 +40,15 @@ class Wind:
 		self.m1_rotating_position = self.config['motor']['M1']['end_to_rotating_position'] + self.m0_wind_range[1]
 		self.m2_angle_to_prevent_collision = self.config['motor']['M2']['angle_to_prevent_collision']
 
+		if self.config['winding']['dont_move_m3']:
+			self.m3_wind_torque = 0
+			self.m3_slow_wind_torque = 0
+			self.m3_pull_wire_torque = 0
+		else:
+			self.m3_wind_torque = self.config['motor']['M3']['wind_torque']
+			self.m3_slow_wind_torque = 0.03
+			self.m3_pull_wire_torque = self.config['motor']['M3']['pull_wire_torque']
+
 	def check_motor_direction(self, motor_id, target):
 		rotating_direction = rotating_directions[motor_id]
 		if not rotating_direction:
@@ -77,11 +86,9 @@ class Wind:
 
 	def set_wire_tension(self):
 		# pull the wire
-		m3_pull_wire_torque = self.config['motor']['M3']['pull_wire_torque']
-		self.move_motor(3, m3_pull_wire_torque)
+		self.move_motor(3, self.m3_pull_wire_torque)
 		sleep(1)
-		m3_wind_torque = self.config['motor']['M3']['wind_torque']
-		self.move_motor(3, m3_wind_torque)
+		self.move_motor(3, self.m3_wind_torque)
 
 	def estop(self):
 		"""
@@ -242,11 +249,11 @@ class Wind:
 		rotating_count = 2
 		steps_per_rotation = 30
 		step = math.pi * 2 / steps_per_rotation * (1 if clockwise else -1)
-		self.move_motor(3, 0.03)
+		self.move_motor(3, self.m3_slow_wind_torque)
 		for i in range(rotating_count * steps_per_rotation):
 			self.move_motor(2, self.motor_positions[2] + step)
 			sleep(0.1)
-		self.move_motor(3, self.config['motor']['M3']['wind_torque'])
+		self.move_motor(3, self.m3_wind_torque)
 
 	def fast_winding(self, clockwise):
 		rotating_count = 3
@@ -327,8 +334,7 @@ class Wind:
 
 	def unwind_slot(self, slot_idx: int, clockwise, wind_idx):
 		# increase the wire tension with motor3
-		m3_pull_wire_torque = self.config['motor']['M3']['pull_wire_torque']
-		self.move_motor(3, m3_pull_wire_torque)
+		self.move_motor(3, self.m3_pull_wire_torque)
 		self.logger.info(f'Unwinding slot {slot_idx} started')
 		self.logger.info('Increasing wire tension')
 		sleep(1)

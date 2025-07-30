@@ -4,7 +4,7 @@
 m2_gear_ratio = 50 / 51
 
 # If True, motor rotates clockwise
-rotating_directions = [True, True, True, False]
+rotating_directions = [True, True, False, False, True]
 
 # wind order for 24n22p motor(motor 2 clockwise=True)
 wind_order_a = [0, 1, 0, 1, 1, 0, 1, 0]

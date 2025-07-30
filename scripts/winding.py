@@ -21,7 +21,7 @@ class Motor2State:
 class Wind:
 
 	def __init__(self):
-		self.motor_positions = [0, 0, 0, 0]
+		self.motor_positions = [0, 0, 0, 0, 0]
 		self.motor2_pos = Motor2State.TOP
 		self.config = load_config()
 		baudrate = self.config['serial']['baudrate']

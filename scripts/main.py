@@ -58,6 +58,10 @@ def main():
 			print(ports)
 			break
 
+		elif key == 'g':
+			wind.grab_wire()
+			break
+
 		elif key == 'q':
 			wind.close()
 			break

@@ -36,6 +36,7 @@ class Wind:
 		self.m0_zero = self.config['motor']['M0']['end_to_zero'] + self.m0_wind_range[1]
 		self.m1_zero = self.config['motor']['M1']['zero']
 		self.m2_zero = self.config['motor']['M2']['zero']
+		self.m4_zero = self.config['motor']['M4']['zero']
 
 		self.m1_rotating_position = self.config['motor']['M1']['end_to_rotating_position'] + self.m0_wind_range[1]
 		self.m2_angle_to_prevent_collision = self.config['motor']['M2']['angle_to_prevent_collision']
@@ -362,6 +363,51 @@ class Wind:
 		if wire_idx == 1 and starts_at in starts_at_from_bottom_b:
 				return True
 		return False
+	
+	def grab_wire(self):
+		"""
+		1. Move M0 to zero position
+		2. M1 + 2
+		3. M2 - 1
+		4. Pull the wire with M3
+		5. Set M4 to the catch wire position
+		6. M2 + 1
+		7. Set M4 to the grab wire position
+		"""
+		# 1. Back to zero
+		self.move_motor(0, self.m0_zero)
+		motor1_pos = self.get_motor_position(1)
+		# 2. Move M1 to the rotating position
+		self.move_motor(1, motor1_pos + 3)
+		sleep(0.5)
+		# 3. Move M2
+		motor2_pos = self.get_motor_position(2)
+		self.move_motor(2, motor2_pos - 1)
+		sleep(0.2)
+
+		# 4. Pull the wire
+		self.move_motor(3, 0.1)
+
+		# 5. Set M4 to the catch wire position
+		self.logger.info('Grabbing wire...')
+		self.move_motor(4, self.config['motor']['M4']['catch_wire_position'])
+		sleep(1)
+
+		# 6. Move M2 back to catch the wire
+		self.move_motor(2, motor2_pos + 1)
+		sleep(1)
+
+		# 7. Set M4 to the grab wire position
+		self.move_motor(4, self.config['motor']['M4']['grab_wire_position'])
+		self.move_motor(3, 0)
+
+		self.move_motor(1, motor1_pos)
+		self.move_motor(2, motor2_pos)
+		self.logger.info('Grab wire done')
+
+	def release_wire(self):
+		# release the wire
+		self.move_motor(4, self.m4_zero)
 
 	def wind(self, wire_idx: int):
 		self.init_position(True)
@@ -390,6 +436,8 @@ class Wind:
 			slot_idx = slot_indices[wire_idx][i]
 
 			self.wind_slot(slot_idx, clockwise, i)
+			if i == 0:
+				self.release_wire()
 		
 		# Back to zero
 		self.move_motor(0, self.m0_zero)

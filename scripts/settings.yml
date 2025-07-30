@@ -6,19 +6,24 @@ serial:
 
 motor:
   M0: 
-    wind_range_end: -16
-    wind_range_start: -23
+    wind_range_end: -14
+    wind_range_start: -21
     end_to_zero: 6.0
   M1:
-    zero: 0.03
+    zero: -0.05
     end_to_rotating_position: 6.0
   M2:
-    zero: 2.2
+    zero: -1.4
     angle_to_prevent_collision: 1.0
   M3:
     zero: 0.0
     pull_wire_torque: 0.2
     wind_torque: 0.0
+  M4:
+    zero: 0.0
+    grab_wire_position: 0.28
+    catch_wire_position: -0.3
+    # catch_wire_position: -0.6
 
 winding:
   # 24n22p

@@ -10,16 +10,24 @@ def main():
 		if key == 'k':
 			sleep(0.1)
 
+			wind.init_position(True)
 			wind.wind(0)
+
+		elif key == 'r':
+			sleep(0.1)
+
+			wind.continue_wind()
 
 		elif key == 'j':
 			sleep(0.1)
 
+			wind.init_position(True)
 			wind.wind(1)
 
 		elif key == 'h':
 			sleep(0.1)
 
+			wind.init_position(True)
 			wind.wind(2)
 
 		elif key == 'i':

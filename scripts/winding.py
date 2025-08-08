@@ -82,16 +82,16 @@ class Wind:
 		self.move_motor(1, self.m1_zero)
 		self.move_motor(0, self.m0_zero)
 		self.move_motor(2, self.m2_zero)
-		self.move_motor(4, self.m4_zero)
+		# self.move_motor(4, self.m4_zero)
 
 		sleep(0.5)
 		if pull_wire:
 			self.set_wire_tension()
 
-	def set_wire_tension(self):
+	def set_wire_tension(self, wait_time=1):
 		# pull the wire
 		self.move_motor(3, self.m3_pull_wire_torque)
-		sleep(1)
+		sleep(wait_time)
 		self.move_motor(3, self.m3_wind_torque)
 
 	def estop(self):
@@ -277,10 +277,12 @@ class Wind:
 		sleep(0.5)
 		self.move_motor(0, self.m0_wind_range[1])
 		sleep(0.5)
-		self.set_motor2_wire_position()
+		if wind_idx != 0:
+			self.set_motor2_wire_position()
 		sleep(0.3)
 		self.move_motor(0, self.m0_wind_range[0])
 		sleep(0.7)
+		self.set_wire_tension(0.5)
 
 		init_motor2_pos = self.get_motor_position(2)
 		assert abs(init_motor2_pos-self.motor_positions[2]) < 0.1, f'init_motor2_pos: {init_motor2_pos}, self.motor_positions[2]: {self.motor_positions[2]}'
@@ -439,7 +441,7 @@ class Wind:
 			sleep(15)
 
 		for i in range(self.starts_at ,int(self.slot_pairs * 2 / 3)):
-			if i == self.starts_at:
+			if i == self.starts_at and i != 0:
 				self.prevent_collision()
 				sleep(0.5)
 

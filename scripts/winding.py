@@ -296,7 +296,7 @@ class Wind:
 		# self.slow_winding(clockwise)
 
 		self.fast_winding(clockwise)
-		self.release_wire()
+		# self.release_wire()
 
 		self.move_motor(2, target_motor2_pos)
 
@@ -395,14 +395,19 @@ class Wind:
 		# self.move_motor(3, 0.1)
 
 		# 5. Set M4 to the catch wire position
-		self.logger.info('Grabbing wire...')
-		self.move_motor(4, self.config['motor']['M4']['catch_wire_position'])
+		# self.logger.info('Grabbing wire...')
+		# self.move_motor(4, self.config['motor']['M4']['catch_wire_position'])
 		sleep(0.5)
 
 		motor1_pos = self.get_motor_position(1)
 		# 2 full rotation of M1
-		self.move_motor(1, motor1_pos + (math.pi * 2) * 2)
-		self.m1_zero += (math.pi * 2) * 2
+		rotation_count = 2
+		motor1_rotation = math.pi * 2 * rotation_count
+		if wire_idx == 0:
+			motor1_rotation = -motor1_rotation
+
+		self.move_motor(1, motor1_pos + motor1_rotation)
+		self.m1_zero += motor1_rotation
 		sleep(1.5)
 
 		motor2_pos = self.get_motor_position(2)
@@ -415,7 +420,7 @@ class Wind:
 
 		# 7. Set M4 to the grab wire position
 		self.move_motor(3, 0)
-		self.move_motor(4, self.config['motor']['M4']['grab_wire_position'])
+		# self.move_motor(4, self.config['motor']['M4']['grab_wire_position'])
 		sleep(1)
 
 		# self.move_motor(1, motor1_pos)

@@ -6,8 +6,9 @@ from config import (
 	rotating_directions, m2_gear_ratio
 )
 from utils import init_logger, load_config
+from enum import Enum
 
-class Motor2State:
+class Motor2State(Enum):
 	TOP = 0
 	BOTTOM = 1
 	TOP_LEFT = 2

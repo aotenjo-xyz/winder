@@ -22,6 +22,9 @@ def main():
 
 			wind.wind(2)
 
+		elif key == 'g':
+			wind.continuous_winding()
+
 		elif key == 'i':
 			wind.init_position()
 

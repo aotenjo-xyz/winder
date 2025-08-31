@@ -37,6 +37,8 @@ class Wind:
 		self.m1_zero = self.config['motor']['M1']['zero']
 		self.m2_zero = self.config['motor']['M2']['zero']
 
+		self.starts_at = self.config['winding']['starts_at']
+
 		self.m1_rotating_position = self.config['motor']['M1']['end_to_rotating_position'] + self.m0_wind_range[1]
 		self.m2_angle_to_prevent_collision = self.config['motor']['M2']['angle_to_prevent_collision']
 
@@ -256,12 +258,12 @@ class Wind:
 		self.move_motor(3, self.m3_wind_torque)
 
 	def fast_winding(self, clockwise):
-		rotating_count = 3
-		steps_per_rotation = 6
+		rotating_count = 1
+		steps_per_rotation = 12
 		step = math.pi * 2 / steps_per_rotation * (1 if clockwise else -1)
 		for i in range(rotating_count * steps_per_rotation):
 			self.move_motor(2, self.motor_positions[2] + step)
-			sleep(0.1)
+			sleep(0.05)
 
 	def wind_slot(self, slot_idx: int, clockwise, wind_idx):
 		# rotate motor1
@@ -272,11 +274,11 @@ class Wind:
 		self.set_wire_tension()
 		sleep(0.5)
 		self.move_motor(0, self.m0_wind_range[1])
-		sleep(0.5)
+		sleep(0.3)
 		self.set_motor2_wire_position()
-		sleep(0.5)
+		sleep(0.2)
 		self.move_motor(0, self.m0_wind_range[0])
-		sleep(1)
+		sleep(0.5)
 
 		init_motor2_pos = self.get_motor_position(2)
 		assert abs(init_motor2_pos-self.motor_positions[2]) < 0.1, f'init_motor2_pos: {init_motor2_pos}, self.motor_positions[2]: {self.motor_positions[2]}'
@@ -287,8 +289,8 @@ class Wind:
 			init_motor2_pos = init_motor2_pos + self.m2_angle_to_prevent_collision
 
 		target_motor2_pos = self.get_target_motor2_pos(clockwise, wind_idx)
-		self.slow_winding(clockwise)
-		# self.fast_winding(clockwise)
+		# self.slow_winding(clockwise)
+		self.fast_winding(clockwise)
 		self.move_motor(2, target_motor2_pos)
 
 		prev_motor2_pos = init_motor2_pos
@@ -364,23 +366,20 @@ class Wind:
 		return False
 
 	def wind(self, wire_idx: int):
-		self.init_position(True)
-
 		wind_order = wind_orders[wire_idx]
 		self.wind_slot_count = len(wind_orders[wire_idx])
 		
-		starts_at = self.config['winding']['starts_at']
-		start_slot_idx = slot_indices[wire_idx][starts_at]
+		start_slot_idx = slot_indices[wire_idx][self.starts_at]
 		self.move_to_slot(start_slot_idx)
-		sleep(1)
+		sleep(0.5)
 
-		if self.is_starting_from_bottom(starts_at, wire_idx):
+		if self.is_starting_from_bottom(self.starts_at, wire_idx):
 			# starting from the bottom
 			self.move_motor(2, self.m2_zero + math.pi)
 			sleep(15)
 
-		for i in range(starts_at ,int(self.slot_pairs * 2 / 3)):
-			if i == starts_at:
+		for i in range(self.starts_at ,int(self.slot_pairs * 2 / 3)):
+			if self.starts_at == i and i != 0:
 				self.prevent_collision()
 				sleep(0.5)
 
@@ -390,11 +389,45 @@ class Wind:
 			slot_idx = slot_indices[wire_idx][i]
 
 			self.wind_slot(slot_idx, clockwise, i)
+
+		if wire_idx != 2:
+			self.wind_wire_around_shaft(wire_idx)
+			self.motor2_pos = Motor2State.TOP
 		
 		# Back to zero
 		self.move_motor(0, self.m0_zero)
 		# self.move_motor(2, self.m2_zero)
 		self.logger.info('Winding done')
+
+	def wind_wire_around_shaft(self, wire_idx: int):
+		# Move M1
+		# start_slot_idx = slot_indices[wire_idx + 1][0]
+		# self.move_to_slot(start_slot_idx)
+		# sleep(0.5)
+
+		motor1_pos = self.get_motor_position(1)
+
+		# 2 full rotation of M1
+		rotation_count = 2
+		motor1_rotation = math.pi * 2 * rotation_count
+		if wire_idx == 0:
+			motor1_rotation = -motor1_rotation
+
+		self.move_motor(1, motor1_pos + motor1_rotation)
+		self.m1_zero += motor1_rotation
+		sleep(1.5)
+
+		motor2_pos = self.get_motor_position(2)
+		self.m2_zero = motor2_pos
+
+	def continuous_winding(self):
+		self.init_position(True)
+
+		self.wind(0)
+		self.starts_at = 0
+		self.wind(1)
+		self.wind(2)
+
 
 	def wind_test(self, wire_idx: int):
 		self.init_position()

@@ -321,38 +321,6 @@ class Wind:
 		self.move_motor(0, self.m1_rotating_position)
 		sleep(1)
 
-	def wind_slot_test(self, slot_idx: int, clockwise, wind_idx):
-		# rotate motor1
-		if wind_idx == int(self.wind_slot_count / 2) and not clockwise:
-			self.move_wire_to_right_position(slot_idx)
-
-		self.move_to_slot(slot_idx)
-		sleep(0.5)
-		self.move_motor(0, self.m0_wind_range[0] + 1)
-		self.logger.info(f"set position to {wind_idx}")
-		sleep(2)
-
-		self.move_motor(0, self.m1_rotating_position)
-		sleep(1)
-
-	def unwind_slot(self, slot_idx: int, clockwise, wind_idx):
-		# increase the wire tension with motor3
-		self.move_motor(3, self.m3_pull_wire_torque)
-		self.logger.info(f'Unwinding slot {slot_idx} started')
-		self.logger.info('Increasing wire tension')
-		sleep(1)
-
-		# start rotating motor2 opposite to the winding direction
-		if clockwise:
-			self.move_motor(2, self.motor_positions[2] - math.pi * 2 * self.turns_per_slot)
-		else:
-			self.move_motor(2, self.motor_positions[2] + math.pi * 2 * self.turns_per_slot)
-		sleep(1)
-
-		self.logger.info(f'Unwinding slot {slot_idx} done')
-		self.move_motor(0, self.m1_rotating_position)
-		sleep(1)
-
 	def is_starting_from_bottom(self, starts_at: int, wire_idx: int):
 		# when starting from 2, 5, 7 for wire A 
 		starts_at_from_bottom_a_c = [2, 5, 7]
@@ -427,39 +395,6 @@ class Wind:
 		self.starts_at = 0
 		self.wind(1)
 		self.wind(2)
-
-
-	def wind_test(self, wire_idx: int):
-		self.init_position()
-
-		wind_order = wind_orders[wire_idx]
-		self.wind_slot_count = len(wind_orders[wire_idx])
-
-		for i in range(int(self.slot_pairs * 2 / 3)):
-			clockwise = wind_order[i]
-			slot_idx = slot_indices[wire_idx][i]
-
-			self.wind_slot(slot_idx, clockwise, i)
-			break # test single slot
-		
-		self.logger.info('Winding test done')
-
-	def slot_test(self, wire_idx: int):
-		self.init_position()
-
-		wind_order = wind_orders[wire_idx]
-		self.wind_slot_count = len(wind_orders[wire_idx])
-
-		for i in range(int(self.slot_pairs * 2 / 3)):
-			clockwise = wind_order[i]
-			slot_idx = slot_indices[wire_idx][i]
-
-			self.wind_slot_test(slot_idx, clockwise, i)
-		
-		# Back to zero
-		self.move_motor(0, self.m0_zero)
-		self.logger.info('Winding done')
-
 
 	def close(self):
 		self.ser.close()

@@ -28,15 +28,8 @@ def main():
 		elif key == 'i':
 			wind.init_position()
 
-		elif key == 'm':
-			# test single slot
-			wind.wind_test(0)
-		
 		elif key == 'z':
 			wind.back_to_zero()
-
-		elif key == 'y':
-			wind.slot_test(0)
 
 		elif len(key) > 1 and key[0] == 's':
 			slot = int(key[1:])

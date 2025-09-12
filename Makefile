@@ -4,8 +4,8 @@ format:
 	black .
 
 lint:
-	ruff .
+	ruff check .
 
 check:
 	black --check .
-	ruff --check .
+	ruff check .

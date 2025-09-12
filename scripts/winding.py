@@ -85,12 +85,12 @@ class Wind:
 
 		sleep(0.5)
 		if pull_wire:
-			self.set_wire_tension()
+			self.set_wire_tension(1)
 
-	def set_wire_tension(self):
+	def set_wire_tension(self, wait_time=0.5):
 		# pull the wire
 		self.move_motor(3, self.m3_pull_wire_torque)
-		sleep(1)
+		sleep(wait_time)
 		self.move_motor(3, self.m3_wind_torque)
 
 	def estop(self):
@@ -206,14 +206,13 @@ class Wind:
 			raise Exception('motor2_pos is not TOP_LEFT')
 		self.motor2_pos = Motor2State.BOTTOM
 
-		sleep(1)
+		sleep(0.3)
 
 		motor2_pos = self.get_motor_position(2)
 		assert abs(motor2_pos - target_motor2_pos) < 0.1, f'motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}'
 
-		sleep(1)
 		self.move_motor(0, self.m1_rotating_position)
-		sleep(1)
+		sleep(0.5)
 
 	def set_motor2_wire_position(self):
 		if self.motor2_pos == Motor2State.TOP_LEFT:
@@ -273,13 +272,12 @@ class Wind:
 
 		self.move_to_slot(slot_idx)
 		self.set_wire_tension()
-		sleep(0.5)
 		self.move_motor(0, self.m0_wind_range[1])
 		sleep(0.3)
 		self.set_motor2_wire_position()
 		sleep(0.2)
 		self.move_motor(0, self.m0_wind_range[0])
-		sleep(0.5)
+		sleep(0.7)
 
 		init_motor2_pos = self.get_motor_position(2)
 		assert abs(init_motor2_pos-self.motor_positions[2]) < 0.1, f'init_motor2_pos: {init_motor2_pos}, self.motor_positions[2]: {self.motor_positions[2]}'
@@ -298,7 +296,7 @@ class Wind:
 		k = 1.0
 		while True:
 			motor2_pos = self.get_motor_position(2)
-			sleep(0.05)
+			sleep(0.03)
 			if abs(motor2_pos - prev_motor2_pos) >= math.pi * k - 0.01: # 0.01 is to avoid floating point error
 				if not abs(motor2_pos - target_motor2_pos) < math.pi * 2:
 					target_motor0_pos = self.get_motor0_target_winding_position(abs(target_motor2_pos - init_motor2_pos), abs(motor2_pos - init_motor2_pos))
@@ -307,7 +305,7 @@ class Wind:
 					continue
 				break
 
-		sleep(1)
+		sleep(0.3)
 		motor2_pos = self.get_motor_position(2)
 		assert abs(motor2_pos - target_motor2_pos) < 0.1, f'motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}'
 
@@ -317,10 +315,10 @@ class Wind:
 		skip_prevent_collision_slot_idx = [3, 11, 15, 19, 23]
 		if slot_idx not in skip_prevent_collision_slot_idx:
 			self.prevent_collision()
-		sleep(0.5)
+		sleep(0.3)
 
 		self.move_motor(0, self.m1_rotating_position)
-		sleep(1)
+		sleep(0.7)
 
 	def is_starting_from_bottom(self, starts_at: int, wire_idx: int):
 		# when starting from 2, 5, 7 for wire A 
@@ -350,7 +348,7 @@ class Wind:
 		for i in range(self.starts_at ,int(self.slot_pairs * 2 / 3)):
 			if self.starts_at == i and i != 0:
 				self.prevent_collision()
-				sleep(0.5)
+				sleep(0.3)
 
 				self.move_motor(0, self.m1_rotating_position)
 				

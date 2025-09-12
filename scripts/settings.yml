@@ -6,14 +6,14 @@ serial:
 
 motor:
   M0: 
-    wind_range_end: -6
-    wind_range_start: -13
+    wind_range_end: -6.5
+    wind_range_start: -12.5
     end_to_zero: 6.0
   M1:
-    zero: 0.02
+    zero: -0.01
     end_to_rotating_position: 4.0
   M2:
-    zero: 2.55
+    zero: 1.84
     angle_to_prevent_collision: 1.0
   M3:
     zero: 0.0

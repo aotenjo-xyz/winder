@@ -26,5 +26,18 @@ dependencies:
   - xz=5.4.6=h5eee18b_1
   - zlib=1.2.13=h5eee18b_1
   - pip:
+      - black==25.1.0
+      - click==8.2.1
+      - iniconfig==2.1.0
+      - mypy-extensions==1.1.0
+      - packaging==25.0
+      - pathspec==0.12.1
+      - platformdirs==4.4.0
+      - pluggy==1.6.0
+      - pygments==2.19.2
       - pyserial==3.5
+      - pytest==8.4.2
       - pyyaml==6.0.2
+      - ruff==0.13.0
+      - websockets==15.0.1
+prefix: /home/yuchi/miniconda3/envs/winding

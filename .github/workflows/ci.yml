@@ -22,6 +22,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           environment-file: scripts/environment.yml
+          activate-environment: winding
       - name: Conda info
         shell: bash -el {0}
         run: conda info

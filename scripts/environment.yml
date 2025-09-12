@@ -40,4 +40,3 @@ dependencies:
       - pyyaml==6.0.2
       - ruff==0.13.0
       - websockets==15.0.1
-prefix: /home/yuchi/miniconda3/envs/winding

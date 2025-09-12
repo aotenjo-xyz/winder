@@ -6,7 +6,6 @@ dependencies:
   - ca-certificates=2024.11.26
   - expat=2.6.3
   - libffi=3.4.4
-  - libuuid=1.41.5
   - ncurses=6.4
   - openssl=3.0.15
   - pip=24.2

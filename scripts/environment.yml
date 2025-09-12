@@ -9,7 +9,6 @@ dependencies:
   - openssl=3.0.15
   - pip=24.2
   - python=3.12.7
-  - readline=8.2
   - setuptools=75.1.0
   - sqlite=3.45.3
   - tk=8.6.14

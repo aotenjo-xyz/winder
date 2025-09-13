@@ -1,0 +1,47 @@
+[gd_scene load_steps=9 format=3 uid="uid://dlyllrsdwpwai"]
+
+[ext_resource type="Script" uid="uid://cehktpuh0h7j4" path="res://node_3d.gd" id="1_a0tk4"]
+[ext_resource type="PackedScene" uid="uid://cqybko33kn63g" path="res://arm.glb" id="1_noarx"]
+[ext_resource type="PackedScene" uid="uid://pklq1775joq1" path="res://stator.glb" id="2_a0tk4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_a0tk4"]
+size = Vector3(150, 2, 300)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r3fl7"]
+size = Vector3(150, 2, 300)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
+
+[sub_resource type="Sky" id="Sky_r3fl7"]
+sky_material = SubResource("ProceduralSkyMaterial_a0tk4")
+
+[sub_resource type="Environment" id="Environment_a0tk4"]
+background_mode = 2
+sky = SubResource("Sky_r3fl7")
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_a0tk4")
+
+[node name="arm" parent="." instance=ExtResource("1_noarx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 100, 0)
+
+[node name="stator" parent="." instance=ExtResource("2_a0tk4")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 85, -80)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = SubResource("BoxMesh_a0tk4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_r3fl7")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.277193, -0.453832, 0.846877, 0.0957496, 0.890076, 0.445642, -0.956032, -0.0424405, 0.290177, 108.898, 165.583, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.0292, 142.377, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_a0tk4")

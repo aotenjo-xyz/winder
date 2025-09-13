@@ -45,3 +45,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.0292, 142.377, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_a0tk4")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.912
+anchor_right = 0.05
+anchor_bottom = 0.912
+offset_left = 0.399998
+offset_top = -140.976
+offset_right = 166.4
+offset_bottom = 0.0239868
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30

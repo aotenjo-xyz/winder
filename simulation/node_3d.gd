@@ -21,10 +21,19 @@ func _ready() -> void:
 func _on_connection_established():
 	print("Connected to Python WebSocket")
 
+func show_motor_positions(motor_positions: Variant):
+	var text := "M0: %s\nM1: %s\nM2: %s\nM3: %s" % [
+		motor_positions["M0"],
+		motor_positions["M1"],
+		motor_positions["M2"],
+		motor_positions["M3"]
+	]
+	$CanvasLayer/Label.text = text
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# Call this in _process or _physics_process. Data transfer and state updates
-	# will only happen when calling this function.
+	# will only happen when calling this function..
 	socket.poll()
 	# get_ready_state() tells you what state the socket is in.
 	var state = socket.get_ready_state()
@@ -42,6 +51,7 @@ func _process(delta: float) -> void:
 				$"stator".position = m0_pos
 				$"stator".rotation.y = -motor_positions["M1"] + PI / 2
 				$"arm".rotation.z = motor_positions["M2"]
+				show_motor_positions(motor_positions)
 
 
 	# WebSocketPeer.STATE_CLOSING means the socket is closing.

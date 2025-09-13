@@ -63,7 +63,7 @@ def main(simulation=False):
 
 
 if __name__ == "__main__":
-    simulation = '--simulation' in sys.argv or '-s' in sys.argv
+    simulation = "--simulation" in sys.argv or "-s" in sys.argv
     try:
         main(simulation)
     except KeyboardInterrupt:

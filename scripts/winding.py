@@ -4,6 +4,9 @@ import math
 from config import wind_orders, slot_indices, rotating_directions, m2_gear_ratio
 from utils import init_logger, load_config
 from enum import Enum
+from datetime import datetime
+from pydantic import BaseModel
+from db import update_motor_position, update_motor_target, init_db
 
 
 class Motor2State(Enum):
@@ -18,15 +21,37 @@ class Motor2State(Enum):
         return self.name
 
 
+class MotorPosition(BaseModel):
+    motor_id: int
+    position: float
+    timestamp: datetime
+
+
 class Wind:
 
-    def __init__(self):
+    def __init__(self, simulation=False):
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
         self.config = load_config()
         baudrate = self.config["serial"]["baudrate"]
         port = self.config["serial"]["port"]
-        self.ser = serial.Serial(port, baudrate)
+        self.simulation = simulation
+        self.motor_velocities = [
+            self.config["motor"]["M0"]["velocity"],
+            self.config["motor"]["M1"]["velocity"],
+            self.config["motor"]["M2"]["velocity"],
+            self.config["motor"]["M3"]["velocity"],
+        ]
+        self.motor_positions_in_simulation = [
+            MotorPosition(motor_id=i, position=0.0, timestamp=datetime.now())
+            for i in range(4)
+        ]
+        if not simulation:
+            port = self.config["serial"]["port"]
+            self.ser = serial.Serial(port, baudrate)
+        else:
+            self.conn = init_db()
+
         self.logger = init_logger()
 
         self.turns_per_slot = self.config["winding"]["turns_per_slot"]
@@ -59,6 +84,23 @@ class Wind:
             self.m3_slow_wind_torque = 0.03
             self.m3_pull_wire_torque = self.config["motor"]["M3"]["pull_wire_torque"]
 
+    def calculate_motor_position_in_simulation(self, motor_id):
+        target_position = self.motor_positions[motor_id]
+        velocity = self.motor_velocities[motor_id]
+        motor_position_in_simulation = self.motor_positions_in_simulation[motor_id]
+        time_diff = (
+            datetime.now() - motor_position_in_simulation.timestamp
+        ).total_seconds()
+        position_diff = target_position - motor_position_in_simulation.position
+        if abs(position_diff) < 0.01:
+            return target_position
+        max_movement = velocity * time_diff
+        if abs(position_diff) <= max_movement:
+            return target_position
+        return motor_position_in_simulation.position + (
+            max_movement if position_diff > 0 else -max_movement
+        )
+
     def check_motor_direction(self, motor_id, target):
         rotating_direction = rotating_directions[motor_id]
         if not rotating_direction:
@@ -81,6 +123,22 @@ class Wind:
         command = f"M{motor_id}A{motor_target}\n"
 
         self.motor_positions[motor_id] = target
+
+        if self.simulation:
+            self.motor_positions_in_simulation[motor_id] = MotorPosition(
+                motor_id=motor_id,
+                position=self.calculate_motor_position_in_simulation(motor_id),
+                timestamp=datetime.now(),
+            )
+            self.logger.debug(f"Simulation mode: {command.strip()}")
+            update_motor_target(self.conn, motor_id, target)
+            if motor_id != 2 and motor_id != 3:
+                # motor 3 is for wire tension, we don't care about its position
+                motor_position_in_simulation = (
+                    self.calculate_motor_position_in_simulation(motor_id)
+                )
+                update_motor_position(self.conn, motor_id, motor_position_in_simulation)
+            return
         self.ser.write(bytes(command, "utf-8"))
         self.logger.debug(command.strip())
 
@@ -126,6 +184,12 @@ class Wind:
         return [port.device for port in ports]
 
     def get_motor_position(self, motor_id):
+        if self.simulation:
+            motor_position_in_simulation = self.calculate_motor_position_in_simulation(
+                motor_id
+            )
+            update_motor_position(self.conn, motor_id, motor_position_in_simulation)
+            return motor_position_in_simulation
         # Run M<motor_id>P to get the current position of the motor
         retries = 3
         while retries > 0:
@@ -463,4 +527,8 @@ class Wind:
         self.wind(2)
 
     def close(self):
-        self.ser.close()
+        if not self.simulation:
+            self.ser.close()
+        else:
+            self.conn.close()
+            self.logger.info("Connection closed")

@@ -40,3 +40,9 @@ This motor was initially a drone motor.
 
 
 [![Drone motor vs DIY gimbal motor](http://img.youtube.com/vi/56WxTAfKFDU/0.jpg)](https://www.youtube.com/shorts/56WxTAfKFDU "Drone motor vs DIY gimbal motor")
+
+## Simulation with Godot
+
+[![Simulation with Godot](http://img.youtube.com/vi/1gFa7yNvHWc/0.jpg)](https://www.youtube.com/shorts/1gFa7yNvHWc "Simulation with Godot")
+
+See [simulation/README.md](simulation/README.md) for details.

@@ -1,9 +1,10 @@
 from winding import Wind
 from time import sleep
+import sys
 
 
-def main():
-    wind = Wind()
+def main(simulation=False):
+    wind = Wind(simulation)
     # wind.back_to_zero()
     while True:
         key = input().strip()
@@ -62,10 +63,12 @@ def main():
 
 
 if __name__ == "__main__":
+    simulation = '--simulation' in sys.argv or '-s' in sys.argv
     try:
-        main()
+        main(simulation)
     except KeyboardInterrupt:
-        wind = Wind()
-        wind.estop()
-        print("Keyboard interrupt detected. Exiting...")
+        wind = Wind(simulation)
+        if not simulation:
+            wind.estop()
+            print("Keyboard interrupt detected. Exiting...")
         exit()

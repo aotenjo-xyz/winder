@@ -1,6 +1,6 @@
 import logging
 import os
-
+import math
 
 class ColorFormatter(logging.Formatter):
     # Define the color codes
@@ -92,3 +92,11 @@ def get_wind_orders_and_slot_indices(winding_config: str):
                 wind_order.append(1)
         wind_orders.append(wind_order)
     return wind_orders, slot_index_matrix
+
+
+def get_current_slot(motor1_pos, m1_zero, slot_count):
+    diff = abs(m1_zero - motor1_pos)
+    slot_number = int(round(diff / ((math.pi * 2) / slot_count)))
+    if slot_number >= slot_count:
+        return slot_number % slot_count
+    return slot_number

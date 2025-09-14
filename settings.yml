@@ -15,7 +15,7 @@ motor:
     end_to_rotating_position: 4.0
     velocity: 5.0
   M2:
-    zero: 1.84
+    zero: 0.0
     angle_to_prevent_collision: 1.0
     velocity: 20.0
   M3:

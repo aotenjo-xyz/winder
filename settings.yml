@@ -26,7 +26,7 @@ motor:
 
 winding:
   # 24n22p
-  slot_pairs: 12
+  slot_count: 24
   # production
   turns_per_slot: 75
   starts_at: 0

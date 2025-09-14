@@ -63,7 +63,7 @@ class Wind:
             if turns_per_slot is not None
             else self.config["winding"]["turns_per_slot"]
         )
-        self.slot_pairs = self.config["winding"]["slot_pairs"]
+        self.slot_count = self.config["winding"]["slot_count"]
 
         self.m0_wind_range = (
             self.config["motor"]["M0"]["wind_range_start"],
@@ -234,7 +234,7 @@ class Wind:
         # winding counter-clockwise
         direction = -1
         self.move_motor(
-            1, self.m1_zero + direction * (math.pi / self.slot_pairs) * slot_idx * k
+            1, self.m1_zero + direction * (math.pi * 2 / self.slot_count) * slot_idx * k
         )
 
     def is_motor2_at_12oclock(self, _motor2_pos=None):
@@ -484,7 +484,7 @@ class Wind:
             self.move_motor(2, self.m2_zero + math.pi)
             sleep(15)
 
-        for i in range(self.starts_at, int(self.slot_pairs * 2 / 3)):
+        for i in range(self.starts_at, int(self.slot_count / 3)):
             if self.starts_at == i and i != 0:
                 self.prevent_collision()
                 sleep(0.3)

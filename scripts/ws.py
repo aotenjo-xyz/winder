@@ -1,12 +1,13 @@
 import asyncio
 import websockets
 import json
-from utils import load_config
-from db import get_all_motors
+from src.utils import load_config
+from src.db import get_all_motors
 from datetime import datetime
 import sqlite3
 
-config = load_config()
+config_file = "settings.yml"
+config = load_config(config_file)
 fps = 60
 frame_duration = 1 / fps
 # logger = init_logger()
@@ -40,7 +41,8 @@ def calculate_motor_position(motor_id, all_motors):
 
 
 async def handler(websocket):
-    conn = sqlite3.connect("motors.db")
+    data_path = "data/motors.db"
+    conn = sqlite3.connect(data_path)
     while True:
         all_motors = get_all_motors(conn)
         motor_positions = {
@@ -58,4 +60,9 @@ async def main():
         await asyncio.Future()
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Keyboard interrupt detected. Exiting...")
+        exit()

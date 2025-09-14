@@ -2,7 +2,7 @@ import sqlite3
 
 
 def init_db():
-    conn = sqlite3.connect("motors.db")
+    conn = sqlite3.connect("data/motors.db")
     cur = conn.cursor()
     cur.execute(
         """
@@ -76,20 +76,3 @@ def get_all_motors(conn):
     """
     )
     return cur.fetchall()
-
-
-def main():
-    conn = init_db()
-
-    # Fetch and print motor data
-    for motor_id in range(4):
-        data = get_motor_data(conn, motor_id)
-        print(
-            f"Motor {data[0]} - Target: {data[1]:.2f}, Position: {data[2]:.2f}, Updated At: {data[3]}"
-        )
-
-    conn.close()
-
-
-if __name__ == "__main__":
-    main()

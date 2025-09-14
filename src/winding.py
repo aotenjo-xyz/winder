@@ -1,12 +1,12 @@
 import serial
 from time import sleep
 import math
-from config import wind_orders, slot_indices, rotating_directions, m2_gear_ratio
-from utils import init_logger, load_config
+from .config import wind_orders, slot_indices, rotating_directions, m2_gear_ratio
+from .utils import init_logger, load_config
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel
-from db import update_motor_position, update_motor_target, init_db
+from .db import update_motor_position, update_motor_target, init_db
 
 
 class Motor2State(Enum):
@@ -29,10 +29,10 @@ class MotorPosition(BaseModel):
 
 class Wind:
 
-    def __init__(self, simulation=False):
+    def __init__(self, config_path, simulation=False, turns_per_slot=None):
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
-        self.config = load_config()
+        self.config = load_config(config_path)
         baudrate = self.config["serial"]["baudrate"]
         port = self.config["serial"]["port"]
         self.simulation = simulation
@@ -51,10 +51,14 @@ class Wind:
             self.ser = serial.Serial(port, baudrate)
         else:
             self.conn = init_db()
+            # reset motor positions in db
+            for i in range(4):
+                update_motor_position(self.conn, i, 0.0)
+                update_motor_target(self.conn, i, 0.0)
 
         self.logger = init_logger()
 
-        self.turns_per_slot = self.config["winding"]["turns_per_slot"]
+        self.turns_per_slot = turns_per_slot if turns_per_slot is not None else self.config["winding"]["turns_per_slot"]
         self.slot_pairs = self.config["winding"]["slot_pairs"]
 
         self.m0_wind_range = (

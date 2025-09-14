@@ -50,10 +50,9 @@ def init_logger():
     return logger
 
 
-def load_config():
+def load_config(config_path):
     import yaml
 
-    config_path = "settings.yml"
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file '{config_path}' not found.")
 

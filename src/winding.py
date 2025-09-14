@@ -1,8 +1,8 @@
 import serial
 from time import sleep
 import math
-from .config import wind_orders, slot_indices, rotating_directions, m2_gear_ratio
-from .utils import init_logger, load_config
+from .config import rotating_directions, m2_gear_ratio
+from .utils import init_logger, load_config, get_wind_orders_and_slot_indices
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel
@@ -33,8 +33,6 @@ class Wind:
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
         self.config = load_config(config_path)
-        baudrate = self.config["serial"]["baudrate"]
-        port = self.config["serial"]["port"]
         self.simulation = simulation
         self.motor_velocities = [
             self.config["motor"]["M0"]["velocity"],
@@ -47,6 +45,7 @@ class Wind:
             for i in range(4)
         ]
         if not simulation:
+            baudrate = self.config["serial"]["baudrate"]
             port = self.config["serial"]["port"]
             self.ser = serial.Serial(port, baudrate)
         else:
@@ -63,7 +62,11 @@ class Wind:
             if turns_per_slot is not None
             else self.config["winding"]["turns_per_slot"]
         )
-        self.slot_count = self.config["winding"]["slot_count"]
+        winding_config = self.config["winding"]["winding_config"]
+        self.slot_count = len(winding_config)
+        self.wind_orders, self.slot_index_matrix = get_wind_orders_and_slot_indices(
+            winding_config
+        )
 
         self.m0_wind_range = (
             self.config["motor"]["M0"]["wind_range_start"],
@@ -472,10 +475,10 @@ class Wind:
         return False
 
     def wind(self, wire_idx: int):
-        wind_order = wind_orders[wire_idx]
-        self.wind_slot_count = len(wind_orders[wire_idx])
+        wind_order = self.wind_orders[wire_idx]
+        self.wind_slot_count = len(self.wind_orders[wire_idx])
 
-        start_slot_idx = slot_indices[wire_idx][self.starts_at]
+        start_slot_idx = self.slot_index_matrix[wire_idx][self.starts_at]
         self.move_to_slot(start_slot_idx)
         sleep(0.5)
 
@@ -492,7 +495,7 @@ class Wind:
                 self.move_motor(0, self.m1_rotating_position)
 
             clockwise = wind_order[i]
-            slot_idx = slot_indices[wire_idx][i]
+            slot_idx = self.slot_index_matrix[wire_idx][i]
 
             self.wind_slot(slot_idx, clockwise, i)
 
@@ -507,7 +510,7 @@ class Wind:
 
     def wind_wire_around_shaft(self, wire_idx: int):
         # Move M1
-        # start_slot_idx = slot_indices[wire_idx + 1][0]
+        # start_slot_idx = self.slot_index_matrix[wire_idx + 1][0]
         # self.move_to_slot(start_slot_idx)
         # sleep(0.5)
 

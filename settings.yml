@@ -25,11 +25,10 @@ motor:
     velocity: 5.0
 
 winding:
-  # 24n22p
-  slot_count: 24
   # production
   turns_per_slot: 75
   starts_at: 0
+  winding_config: "AaAabBbBCcCcaAaABbBbcCcC"
   dont_move_m3: false # true for debugging, false for production
   
 

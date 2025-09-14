@@ -6,17 +6,29 @@ m2_gear_ratio = 50 / 50
 # If True, motor rotates clockwise
 rotating_directions = [True, True, True, False]
 
-# wind order for 24n22p motor(motor 2 clockwise=True)
-wind_order_a = [0, 1, 0, 1, 1, 0, 1, 0]
-# t(+0) d(+180) t(+180) T(+0) - d(+180) t(+180) d(+180) t(+180)
-wind_order_b = [1, 0, 1, 0, 0, 1, 0, 1]
-# d(+180) t(+180) d(+180) t(+180) - D(+180) t(+180) d(+180) t(+180) T(+0)
-wind_order_c = [0, 1, 0, 1, 1, 0, 1, 0]
 
-wind_orders = [wind_order_a, wind_order_b, wind_order_c]
+def get_wind_orders_and_slot_indices(winding_config: str):
+    only_small_letters = winding_config.lower()
+    slot_indices_a = []
+    slot_indices_b = []
+    slot_indices_c = []
+    for i, letter in enumerate(only_small_letters):
+        if letter == "a":
+            slot_indices_a.append(i)
+        elif letter == "b":
+            slot_indices_b.append(i)
+        elif letter == "c":
+            slot_indices_c.append(i)
+    slot_index_matrix = [slot_indices_a, slot_indices_b, slot_indices_c]
 
-slot_indices_a = [0, 1, 2, 3, 12, 13, 14, 15]
-slot_indices_b = [4, 5, 6, 7, 16, 17, 18, 19]
-slot_indices_c = [8, 9, 10, 11, 20, 21, 22, 23]
-
-slot_indices = [slot_indices_a, slot_indices_b, slot_indices_c]
+    wind_orders = []
+    for slot_indices in slot_index_matrix:
+        wind_order = []
+        for slot_idx in slot_indices:
+            letter = winding_config[slot_idx]
+            if letter.isupper():
+                wind_order.append(0)
+            else:
+                wind_order.append(1)
+        wind_orders.append(wind_order)
+    return wind_orders, slot_index_matrix

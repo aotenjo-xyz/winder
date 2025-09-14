@@ -23,6 +23,7 @@ motor_velocities = [
 m1_zero = config["motor"]["M1"]["zero"]
 slot_count = config["winding"]["slot_count"]
 
+
 def calculate_motor_position(motor_id, all_motors):
     velocity = motor_velocities[motor_id]
     target = all_motors[motor_id][1]
@@ -42,12 +43,14 @@ def calculate_motor_position(motor_id, all_motors):
         estimated_position = target
     return round(estimated_position, 3)
 
+
 def get_current_slot(motor1_pos):
     diff = abs(m1_zero - motor1_pos)
     slot_number = int(round(diff / ((math.pi * 2) / slot_count)))
     if slot_number >= slot_count:
-        return slot_number % slot_count  
+        return slot_number % slot_count
     return slot_number
+
 
 async def handler(websocket):
     data_path = "data/motors.db"

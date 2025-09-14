@@ -1,6 +1,7 @@
 from time import sleep
 from src.winding import Wind
 
+
 def main():
     config_file = "settings.yml"
     wind = Wind(config_file)

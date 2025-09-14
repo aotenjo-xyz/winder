@@ -58,7 +58,11 @@ class Wind:
 
         self.logger = init_logger()
 
-        self.turns_per_slot = turns_per_slot if turns_per_slot is not None else self.config["winding"]["turns_per_slot"]
+        self.turns_per_slot = (
+            turns_per_slot
+            if turns_per_slot is not None
+            else self.config["winding"]["turns_per_slot"]
+        )
         self.slot_pairs = self.config["winding"]["slot_pairs"]
 
         self.m0_wind_range = (

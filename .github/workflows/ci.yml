@@ -39,3 +39,31 @@ jobs:
         shell: bash -el {0}
         run: |
           ruff check . --exit-zero
+
+  test:
+    name: Run Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.12"]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: scripts/environment.yml
+          activate-environment: winding
+      - name: Conda info
+        shell: bash -el {0}
+        run: conda info
+      - name: Conda list
+        shell: pwsh
+        run: conda list
+      - name: Run tests with pytest
+        shell: bash -el {0}
+        run: |
+          pytest -v --tb=short --disable-warnings tests/

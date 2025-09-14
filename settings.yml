@@ -15,7 +15,7 @@ motor:
     end_to_rotating_position: 4.0
     velocity: 5.0
   M2:
-    zero: 1.84
+    zero: 0.0
     angle_to_prevent_collision: 1.0
     velocity: 20.0
   M3:
@@ -25,11 +25,10 @@ motor:
     velocity: 5.0
 
 winding:
-  # 24n22p
-  slot_pairs: 12
   # production
   turns_per_slot: 75
   starts_at: 0
+  winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p
   dont_move_m3: false # true for debugging, false for production
   
 

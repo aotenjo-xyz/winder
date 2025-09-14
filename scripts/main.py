@@ -1,10 +1,11 @@
-from winding import Wind
+from src.winding import Wind
 from time import sleep
 import sys
 
 
 def main(simulation=False):
-    wind = Wind(simulation)
+    config_file = "settings.yml"
+    wind = Wind(config_file, simulation)
     # wind.back_to_zero()
     while True:
         key = input().strip()

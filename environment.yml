@@ -17,6 +17,7 @@ dependencies:
   - xz=5.4.6
   - zlib=1.2.13
   - pip:
+      - annotated-types==0.7.0
       - black==25.1.0
       - click==8.2.1
       - iniconfig==2.1.0
@@ -25,9 +26,13 @@ dependencies:
       - pathspec==0.12.1
       - platformdirs==4.4.0
       - pluggy==1.6.0
+      - pydantic==2.11.7
+      - pydantic-core==2.33.2
       - pygments==2.19.2
       - pyserial==3.5
       - pytest==8.4.2
       - pyyaml==6.0.2
       - ruff==0.13.0
+      - typing-extensions==4.15.0
+      - typing-inspection==0.4.1
       - websockets==15.0.1

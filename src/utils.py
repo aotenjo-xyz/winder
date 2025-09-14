@@ -50,13 +50,45 @@ def init_logger():
     return logger
 
 
-def load_config():
+def load_config(config_path):
     import yaml
 
-    config_path = "settings.yml"
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file '{config_path}' not found.")
 
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     return config
+
+
+def get_wind_orders_and_slot_indices(winding_config: str):
+    """
+    Get winding orders and slot indices from winding configuration string.
+    You can find the winding configuration string at [Winding Scheme Calculator](https://www.bavaria-direct.co.za/scheme/calculator/)
+
+    Example: "AaAabBbBCcCcaAaABbBbcCcC" for 24n22p motor (24 slots, 22 poles)
+    """
+    only_small_letters = winding_config.lower()
+    slot_indices_a = []
+    slot_indices_b = []
+    slot_indices_c = []
+    for i, letter in enumerate(only_small_letters):
+        if letter == "a":
+            slot_indices_a.append(i)
+        elif letter == "b":
+            slot_indices_b.append(i)
+        elif letter == "c":
+            slot_indices_c.append(i)
+    slot_index_matrix = [slot_indices_a, slot_indices_b, slot_indices_c]
+
+    wind_orders = []
+    for slot_indices in slot_index_matrix:
+        wind_order = []
+        for slot_idx in slot_indices:
+            letter = winding_config[slot_idx]
+            if letter.isupper():
+                wind_order.append(0)
+            else:
+                wind_order.append(1)
+        wind_orders.append(wind_order)
+    return wind_orders, slot_index_matrix

@@ -1,20 +1,10 @@
-import serial
 from time import sleep
-from winding import Wind
-
-from utils import init_logger, load_config
-
-# Load configuration
-config = load_config()
-PORT = config["serial"]["port"]
-BAUDRATE = config["serial"]["baudrate"]
-
-ser = serial.Serial(PORT, BAUDRATE)
-logger = init_logger()
+from src.winding import Wind
 
 
 def main():
-    wind = Wind()
+    config_file = "settings.yml"
+    wind = Wind(config_file)
     while True:
         key = input().strip()
         motor_id = key[0]
@@ -30,9 +20,7 @@ def main():
             wind.move_motor(int(motor_id), float(target))
             sleep(0.1)
 
-    ser.close()
-
-    logger.info("Done")
+    wind.close()
     exit()
 
 
@@ -41,5 +29,4 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("Keyboard interrupt detected. Exiting...")
-        ser.close()
         exit()

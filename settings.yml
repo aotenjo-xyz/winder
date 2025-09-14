@@ -28,7 +28,7 @@ winding:
   # production
   turns_per_slot: 75
   starts_at: 0
-  winding_config: "AaAabBbBCcCcaAaABbBbcCcC"
+  winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p
   dont_move_m3: false # true for debugging, false for production
   
 

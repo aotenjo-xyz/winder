@@ -1,4 +1,4 @@
-from src.config import get_wind_orders_and_slot_indices
+from src.utils import get_wind_orders_and_slot_indices
 
 
 def test_get_wind_orders_and_slot_indices():

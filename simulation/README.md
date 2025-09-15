@@ -1,9 +1,15 @@
 # Simulation with Godot
 
 ## Overview
+[![Simulation with Godot](http://img.youtube.com/vi/92i8CDEzeJ8/0.jpg)](https://www.youtube.com/shorts/92i8CDEzeJ8 "Simulation with Godot")
+
+[Tutorial Video](https://www.youtube.com/watch?v=92i8CDEzeJ8)
+
 scripts/main.py: This script initializes and runs the winding machine motor control program and store motor data to sqlite database.
 
 scripts/ws.py: This script implements a WebSocket server to stream motor data to Godot.
+
+
 
 ## Prerequisites
 

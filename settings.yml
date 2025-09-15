@@ -19,7 +19,6 @@ motor:
     angle_to_prevent_collision: 1.0
     velocity: 20.0
   M3:
-    zero: 0.0
     pull_wire_torque: 0.2
     wind_torque: 0.08
     velocity: 5.0
@@ -30,9 +29,3 @@ winding:
   starts_at: 0
   winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p
   dont_move_m3: false # true for debugging, false for production
-  
-
-
-logging:
-  level: "INFO"
-  file: "winding_machine.log"

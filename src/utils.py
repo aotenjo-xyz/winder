@@ -2,6 +2,7 @@ import logging
 import os
 import math
 
+
 class ColorFormatter(logging.Formatter):
     # Define the color codes
     COLORS = {

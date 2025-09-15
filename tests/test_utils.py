@@ -20,6 +20,7 @@ def test_get_wind_orders_and_slot_indices():
 
     assert slot_indices == [slot_indices_a, slot_indices_b, slot_indices_c]
 
+
 def test_get_current_slot():
     m1_zero = -0.01
     slot_count = 24

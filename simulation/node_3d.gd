@@ -27,7 +27,7 @@ func show_motor_positions(motor_positions: Variant):
 		motor_positions["M1"],
 		motor_positions["M2"],
 		motor_positions["M3"],
-		int(	motor_positions["slot"])
+		int(motor_positions["slot"])
 	]
 	$CanvasLayer/Label.text = text
 	

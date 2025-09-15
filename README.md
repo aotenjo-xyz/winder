@@ -43,6 +43,8 @@ This motor was initially a drone motor.
 
 ## Simulation with Godot
 
+[Quickstart](simulation/README.md)
+
 [![Simulation with Godot](http://img.youtube.com/vi/1gFa7yNvHWc/0.jpg)](https://www.youtube.com/shorts/1gFa7yNvHWc "Simulation with Godot")
 
 See [simulation/README.md](simulation/README.md) for details.

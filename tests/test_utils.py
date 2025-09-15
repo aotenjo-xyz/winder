@@ -1,4 +1,4 @@
-from src.utils import get_wind_orders_and_slot_indices
+from src.utils import get_wind_orders_and_slot_indices, get_current_slot
 
 
 def test_get_wind_orders_and_slot_indices():
@@ -19,3 +19,11 @@ def test_get_wind_orders_and_slot_indices():
     slot_indices_c = [8, 9, 10, 11, 20, 21, 22, 23]
 
     assert slot_indices == [slot_indices_a, slot_indices_b, slot_indices_c]
+
+
+def test_get_current_slot():
+    m1_zero = -0.01
+    slot_count = 24
+    motor1_pos = -0.534
+    current_slot = get_current_slot(motor1_pos, m1_zero, slot_count)
+    assert current_slot == 2

@@ -1,11 +1,10 @@
 import asyncio
 import websockets
 import json
-from src.utils import load_config
+from src.utils import load_config, get_current_slot
 from src.db import get_all_motors
 from datetime import datetime
 import sqlite3
-import math
 
 config_file = "settings.yml"
 config = load_config(config_file)
@@ -21,7 +20,7 @@ motor_velocities = [
 ]
 
 m1_zero = config["motor"]["M1"]["zero"]
-slot_count = config["winding"]["slot_count"]
+slot_count = len(config["winding"]["winding_config"])
 
 
 def calculate_motor_position(motor_id, all_motors):
@@ -44,21 +43,13 @@ def calculate_motor_position(motor_id, all_motors):
     return round(estimated_position, 3)
 
 
-def get_current_slot(motor1_pos):
-    diff = abs(m1_zero - motor1_pos)
-    slot_number = int(round(diff / ((math.pi * 2) / slot_count)))
-    if slot_number >= slot_count:
-        return slot_number % slot_count
-    return slot_number
-
-
 async def handler(websocket):
     data_path = "data/motors.db"
     conn = sqlite3.connect(data_path)
     while True:
         all_motors = get_all_motors(conn)
         motor1_pos = calculate_motor_position(1, all_motors)
-        current_slot = get_current_slot(motor1_pos)
+        current_slot = get_current_slot(motor1_pos, m1_zero, slot_count)
         motor_positions = {
             "M0": calculate_motor_position(0, all_motors),
             "M1": motor1_pos,

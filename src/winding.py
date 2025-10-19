@@ -409,6 +409,18 @@ class Wind:
                 self.get_motor_position(2)
             sleep(0.05)
 
+    def get_init_motor2_pos(self):
+        current_motor2_pos = self.get_motor_position(2)
+        assert (
+            abs(current_motor2_pos - self.motor_positions[2]) < 0.1
+        ), f"current_motor2_pos: {current_motor2_pos}, self.motor_positions[2]: {self.motor_positions[2]}"
+
+        if self.motor2_pos == Motor2State.TOP_RIGHT:
+            return current_motor2_pos - self.m2_angle_to_prevent_collision
+        if self.motor2_pos == Motor2State.BOTTOM_RIGHT:
+            return current_motor2_pos + self.m2_angle_to_prevent_collision
+        return current_motor2_pos
+
     def wind_slot(self, slot_idx: int, clockwise, wind_idx):
         if wind_idx == int(self.wind_slot_count / 2) and not clockwise:
             self.move_wire_to_right_position(slot_idx)
@@ -423,16 +435,7 @@ class Wind:
         self.move_motor(0, self.m0_wind_range[0])
         sleep(1.2)
 
-        init_motor2_pos = self.get_motor_position(2)
-        assert (
-            abs(init_motor2_pos - self.motor_positions[2]) < 0.1
-        ), f"init_motor2_pos: {init_motor2_pos}, self.motor_positions[2]: {self.motor_positions[2]}"
-
-        if self.motor2_pos == Motor2State.TOP_RIGHT:
-            init_motor2_pos = init_motor2_pos - self.m2_angle_to_prevent_collision
-        elif self.motor2_pos == Motor2State.BOTTOM_RIGHT:
-            init_motor2_pos = init_motor2_pos + self.m2_angle_to_prevent_collision
-
+        init_motor2_pos = self.get_init_motor2_pos()
         target_motor2_pos = self.get_target_motor2_pos(clockwise, wind_idx)
         # self.slow_winding(clockwise)
         self.fast_winding(clockwise)

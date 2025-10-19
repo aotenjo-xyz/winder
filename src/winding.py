@@ -171,6 +171,10 @@ class Wind:
         sleep(wait_time)
         self.move_motor(3, self.m3_wind_torque)
 
+    def release_wire_tension(self):
+        # release the wire tension
+        self.move_motor(3, 0)
+
     def estop(self):
         """
         Stop all motors
@@ -404,13 +408,13 @@ class Wind:
             self.move_wire_to_right_position(slot_idx)
 
         self.move_to_slot(slot_idx)
-        self.set_wire_tension()
+        self.set_wire_tension(1)
         self.move_motor(0, self.m0_wind_range[1])
-        sleep(0.3)
+        sleep(0.8)
         self.set_motor2_wire_position()
         sleep(0.2)
         self.move_motor(0, self.m0_wind_range[0])
-        sleep(0.7)
+        sleep(1.2)
 
         init_motor2_pos = self.get_motor_position(2)
         assert (
@@ -445,7 +449,7 @@ class Wind:
                     continue
                 break
 
-        sleep(0.3)
+        sleep(0.5)
         motor2_pos = self.get_motor_position(2)
         assert (
             abs(motor2_pos - target_motor2_pos) < 0.1
@@ -457,10 +461,10 @@ class Wind:
         skip_prevent_collision_slot_idx = [3, 11, 15, 19, 23]
         if slot_idx not in skip_prevent_collision_slot_idx:
             self.prevent_collision()
-        sleep(0.3)
+        sleep(0.7)
 
         self.move_motor(0, self.m1_rotating_position)
-        sleep(0.7)
+        sleep(1.5)
 
     def is_starting_from_bottom(self, starts_at: int, wire_idx: int):
         # when starting from 2, 5, 7 for wire A

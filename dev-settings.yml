@@ -1,0 +1,32 @@
+# Configuration file for winding machine
+# simulation settings
+
+serial:
+  port: "/dev/ttyACM0"
+  baudrate: 115200
+
+motor:
+  M0: 
+    wind_range_end: -14.0
+    wind_range_start: -25.5
+    end_to_zero: 9.0
+    velocity: 5.0
+  M1:
+    zero: 0.0
+    end_to_rotating_position: 6.0
+    velocity: 1.0
+  M2:
+    zero: 0.0
+    angle_to_prevent_collision: 1.0
+    velocity: 20.0
+  M3:
+    pull_wire_torque: 0.15
+    wind_torque: 0.04
+    velocity: 5.0
+
+winding:
+  # production
+  turns_per_slot: 15
+  starts_at: 0
+  winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p
+  dont_move_m3: false # true for debugging, false for production

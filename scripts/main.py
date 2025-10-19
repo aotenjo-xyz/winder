@@ -64,6 +64,8 @@ def main(wind: Wind):
 if __name__ == "__main__":
     simulation = "--simulation" in sys.argv or "-s" in sys.argv
     config_file = "settings.yml"
+    if simulation:
+        config_file = "dev-settings.yml"
     wind = Wind(config_file, simulation)
     try:
         main(wind)

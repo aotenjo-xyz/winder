@@ -95,6 +95,20 @@ def get_wind_orders_and_slot_indices(winding_config: str):
     return wind_orders, slot_index_matrix
 
 
+def is_starting_from_bottom(starts_at: int, wind_order, slot_indices) -> bool:
+    """
+    Determine if the winding starts from the bottom based on the starting position and wire index.
+    """
+    if starts_at == 0:
+        return False
+    slot_idx = slot_indices[starts_at]
+    prev_slot_idx = slot_indices[starts_at - 1]
+    if slot_idx - prev_slot_idx != 1:
+        return False
+
+    return wind_order[starts_at - 1] == 1
+
+
 def get_current_slot(motor1_pos, m1_zero, slot_count):
     diff = abs(m1_zero - motor1_pos)
     slot_number = int(round(diff / ((math.pi * 2) / slot_count)))

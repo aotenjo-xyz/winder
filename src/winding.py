@@ -2,7 +2,12 @@ import serial
 from time import sleep
 import math
 from .config import rotating_directions, m2_gear_ratio
-from .utils import init_logger, load_config, get_wind_orders_and_slot_indices
+from .utils import (
+    init_logger,
+    load_config,
+    get_wind_orders_and_slot_indices,
+    is_starting_from_bottom,
+)
 from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel
@@ -466,18 +471,6 @@ class Wind:
         self.move_motor(0, self.m1_rotating_position)
         sleep(1.5)
 
-    def is_starting_from_bottom(self, starts_at: int, wire_idx: int):
-        # when starting from 2, 5, 7 for wire A
-        starts_at_from_bottom_a_c = [2, 5, 7]
-        if wire_idx != 1 and starts_at in starts_at_from_bottom_a_c:
-            return True
-
-        # when starting from 1, 3 for wire B
-        starts_at_from_bottom_b = [1, 3, 6]
-        if wire_idx == 1 and starts_at in starts_at_from_bottom_b:
-            return True
-        return False
-
     def wind(self, wire_idx: int):
         wind_order = self.wind_orders[wire_idx]
         self.wind_slot_count = len(self.wind_orders[wire_idx])
@@ -486,7 +479,9 @@ class Wind:
         self.move_to_slot(start_slot_idx)
         sleep(0.5)
 
-        if self.is_starting_from_bottom(self.starts_at, wire_idx):
+        if is_starting_from_bottom(
+            self.starts_at, wind_order, self.slot_index_matrix[wire_idx]
+        ):
             # starting from the bottom
             self.move_motor(2, self.m2_zero + math.pi)
             sleep(15)

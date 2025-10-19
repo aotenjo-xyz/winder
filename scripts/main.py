@@ -3,9 +3,7 @@ from time import sleep
 import sys
 
 
-def main(simulation=False):
-    config_file = "settings.yml"
-    wind = Wind(config_file, simulation)
+def main(wind: Wind):
     # wind.back_to_zero()
     while True:
         key = input().strip()
@@ -65,11 +63,13 @@ def main(simulation=False):
 
 if __name__ == "__main__":
     simulation = "--simulation" in sys.argv or "-s" in sys.argv
+    config_file = "settings.yml"
+    wind = Wind(config_file, simulation)
     try:
-        main(simulation)
+        main(wind)
     except KeyboardInterrupt:
-        wind = Wind(simulation)
         if not simulation:
             wind.estop()
+            wind.close()
             print("Keyboard interrupt detected. Exiting...")
         exit()

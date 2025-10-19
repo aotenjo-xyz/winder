@@ -377,12 +377,17 @@ class Wind:
         ), f"motor0_target: {motor0_target} is out of range {self.m0_wind_range}"
         return motor0_target
 
-    def prevent_collision(self):
-        if self.is_motor2_at_12oclock():
+    def prevent_collision(self, clockwise):
+        if self.is_motor2_at_12oclock() and not clockwise:
             self.move_motor(
                 2, self.motor_positions[2] - self.m2_angle_to_prevent_collision
             )
             self.motor2_pos = Motor2State.TOP_LEFT
+        elif self.is_motor2_at_12oclock() and clockwise:
+            self.move_motor(
+                2, self.motor_positions[2] + self.m2_angle_to_prevent_collision
+            )
+            self.motor2_pos = Motor2State.TOP_RIGHT
         else:
             self.move_motor(
                 2, self.motor_positions[2] + self.m2_angle_to_prevent_collision
@@ -468,9 +473,9 @@ class Wind:
         self.logger.info(f"Winding slot {slot_idx} done")
 
         # move motor 2 to the left to prevent collision
-        skip_prevent_collision_slot_idx = [3, 11, 15, 19, 23]
+        skip_prevent_collision_slot_idx = [15, 19, 23]
         if slot_idx not in skip_prevent_collision_slot_idx:
-            self.prevent_collision()
+            self.prevent_collision(clockwise)
         sleep(0.7)
 
         self.move_motor(0, self.m1_rotating_position)
@@ -489,16 +494,17 @@ class Wind:
         ):
             # starting from the bottom
             self.move_motor(2, self.m2_zero + math.pi)
-            sleep(15)
+            if not self.simulation:
+                sleep(15)
 
         for i in range(self.starts_at, int(self.slot_count / 3)):
+            clockwise = wind_order[i]
             if self.starts_at == i and i != 0:
-                self.prevent_collision()
+                self.prevent_collision(clockwise)
                 sleep(0.3)
 
                 self.move_motor(0, self.m1_rotating_position)
 
-            clockwise = wind_order[i]
             slot_idx = self.slot_index_matrix[wire_idx][i]
 
             self.wind_slot(slot_idx, clockwise, i)

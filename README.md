@@ -6,7 +6,7 @@ Winding the wire for a BLDC motor is a time-consuming and labor-intensive proces
 
 ## Motors
 This machine uses four motors to perform the winding operation:
-<img src="/.github/images/motor-name.png" alt="Motor name" width="500"/>
+<img src="/.github/images/motor-name.jpg" alt="Motor name" width="500"/>
 
 - **M0**: Move M1 unit (closed loop control)
 - **M1**: Rotate the stator (closed loop control)
@@ -26,9 +26,9 @@ code: [Aotenjo Master](https://github.com/aotenjo-xyz/master)
 Power supply: 18V 1.5A
 
 ## Hardware
-- M0: GBM5208 gimbal motor or BE4108 75T gimbal motor (built with this machine)
-- M1: GBM5208 gimbal motor
-- M2: GBM5208 gimbal motor
+- M0: BE4108 75T gimbal motor (built with this machine)
+- M1: BE4108 75T gimbal motor (built with this machine)
+- M2: BE4108 75T gimbal motor (built with this machine)
 - M3: BE4108 60T gimbal motor (built with this machine)
 
 ## Result

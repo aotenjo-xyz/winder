@@ -405,13 +405,15 @@ class Wind:
         step = math.pi * 2 / steps_per_rotation * (1 if clockwise else -1)
         for i in range(rotating_count * steps_per_rotation):
             self.move_motor(2, self.motor_positions[2] + step)
+            if self.simulation:
+                self.get_motor_position(2)
             sleep(0.05)
 
     def wind_slot(self, slot_idx: int, clockwise, wind_idx):
-        # rotate motor1
         if wind_idx == int(self.wind_slot_count / 2) and not clockwise:
             self.move_wire_to_right_position(slot_idx)
 
+        # rotate motor1
         self.move_to_slot(slot_idx)
         self.set_wire_tension(1)
         self.move_motor(0, self.m0_wind_range[1])

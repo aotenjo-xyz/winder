@@ -312,7 +312,7 @@ class Wind:
     def move_wire_to_right_position(self, slot_idx):
         # move to slot_idx - 1 and rotate motor2 by 180 degrees clockwise
         self.move_to_slot(slot_idx - 1)
-        sleep(0.5)
+        sleep(0.7)
         self.move_motor(0, self.m0_wind_range[0])
         sleep(1)
         if self.motor2_pos == Motor2State.TOP_LEFT:
@@ -336,7 +336,7 @@ class Wind:
         ), f"motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}"
 
         self.move_motor(0, self.m1_rotating_position)
-        sleep(0.5)
+        sleep(1.0)
 
     def set_motor2_wire_position(self):
         if self.motor2_pos == Motor2State.TOP_LEFT:

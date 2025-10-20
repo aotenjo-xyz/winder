@@ -2,7 +2,7 @@ from src.winding import Wind
 
 
 turns_per_slot = 5  # Use a smaller number for testing
-config_file = "settings.yml"
+config_file = "dev-settings.yml"
 
 
 def test_winding_wire0():

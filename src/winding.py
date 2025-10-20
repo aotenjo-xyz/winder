@@ -473,7 +473,7 @@ class Wind:
         self.logger.info(f"Winding slot {slot_idx} done")
 
         # move motor 2 to the left to prevent collision
-        skip_prevent_collision_slot_idx = [15, 19, 23]
+        skip_prevent_collision_slot_idx = [23]
         if slot_idx not in skip_prevent_collision_slot_idx:
             self.prevent_collision(clockwise)
         sleep(0.7)
@@ -509,14 +509,7 @@ class Wind:
 
             self.wind_slot(slot_idx, clockwise, i)
 
-        if wire_idx != 2:
-            self.wind_wire_around_shaft(wire_idx)
-            self.motor2_pos = Motor2State.TOP
-
-        # Back to zero
-        self.move_motor(0, self.m0_zero)
-        # self.move_motor(2, self.m2_zero)
-        self.logger.info("Winding done")
+        self.logger.info(f"Winding wire {wire_idx} done")
 
     def wind_wire_around_shaft(self, wire_idx: int):
         # Move M1
@@ -536,6 +529,18 @@ class Wind:
         self.m1_zero += motor1_rotation
         sleep(1.5)
 
+        if self.motor2_pos == Motor2State.TOP_LEFT:
+            self.move_motor(2, self.motor_positions[2] + self.m2_angle_to_prevent_collision)
+        elif self.motor2_pos == Motor2State.TOP_RIGHT:
+            self.move_motor(2, self.motor_positions[2] - self.m2_angle_to_prevent_collision)
+        else:
+            self.logger.warning("motor2_pos is not TOP_LEFT or TOP_RIGHT")
+            self.logger.warning(
+                f"motor2_pos: {self.motor_positions[2]}, self.motor2_pos: {self.motor2_pos}"
+            )
+            raise Exception("motor2_pos is not TOP_LEFT or TOP_RIGHT")
+        sleep(0.5)
+        self.motor2_pos = Motor2State.TOP
         motor2_pos = self.get_motor_position(2)
         self.m2_zero = motor2_pos
 
@@ -543,8 +548,10 @@ class Wind:
         self.init_position(True)
 
         self.wind(0)
+        self.wind_wire_around_shaft(0)
         self.starts_at = 0
         self.wind(1)
+        self.wind_wire_around_shaft(1)
         self.wind(2)
 
     def close(self):

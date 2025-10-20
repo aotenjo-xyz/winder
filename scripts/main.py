@@ -11,16 +11,19 @@ def main(wind: Wind):
             sleep(0.1)
 
             wind.wind(0)
+            wind.move_motor(0, wind.m0_zero)
 
         elif key == "j":
             sleep(0.1)
 
             wind.wind(1)
+            wind.move_motor(0, wind.m0_zero)
 
         elif key == "h":
             sleep(0.1)
 
             wind.wind(2)
+            wind.move_motor(0, wind.m0_zero)
 
         elif key == "g":
             wind.continuous_winding()

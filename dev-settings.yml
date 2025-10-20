@@ -10,7 +10,7 @@ motor:
     wind_range_end: -14.0
     wind_range_start: -25.5
     end_to_zero: 9.0
-    velocity: 5.0
+    velocity: 10.0
   M1:
     zero: 0.0
     end_to_rotating_position: 6.0

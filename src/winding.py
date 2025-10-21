@@ -12,6 +12,7 @@ from enum import Enum
 from datetime import datetime
 from pydantic import BaseModel
 from .db import update_motor_position, update_motor_target, init_db
+from .position import get_motor0_target_winding_position
 
 
 class Motor2State(Enum):
@@ -361,23 +362,6 @@ class Wind:
             )
             self.motor2_pos = Motor2State.BOTTOM_RIGHT
 
-    def get_motor0_target_winding_position(
-        self, motor2_total_mileage, current_motor2_mileage
-    ):
-        wind_range_distance = abs(self.m0_wind_range[1] - self.m0_wind_range[0])
-        target_motor0_mileage = (
-            wind_range_distance * 2 / motor2_total_mileage * current_motor2_mileage
-        )
-        if target_motor0_mileage < wind_range_distance:
-            motor0_target = self.m0_wind_range[0] + target_motor0_mileage
-        else:
-            motor0_target = self.m0_wind_range[1] - (
-                target_motor0_mileage - wind_range_distance
-            )
-        assert (
-            self.m0_wind_range[0] <= motor0_target <= self.m0_wind_range[1]
-        ), f"motor0_target: {motor0_target} is out of range {self.m0_wind_range}"
-        return motor0_target
 
     def prevent_collision(self, clockwise):
         if self.is_motor2_at_12oclock() and not clockwise:
@@ -457,9 +441,12 @@ class Wind:
                 abs(motor2_pos - prev_motor2_pos) >= math.pi * k - 0.01
             ):  # 0.01 is to avoid floating point error
                 if not abs(motor2_pos - target_motor2_pos) < math.pi * 2:
-                    target_motor0_pos = self.get_motor0_target_winding_position(
+                    target_motor0_pos = get_motor0_target_winding_position(
                         abs(target_motor2_pos - init_motor2_pos),
                         abs(motor2_pos - init_motor2_pos),
+                        self.m0_wind_range,
+                        "ease-out-sine",
+                        self.logger
                     )
                     self.move_motor(0, target_motor0_pos)
                     prev_motor2_pos = motor2_pos

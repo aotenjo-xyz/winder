@@ -362,7 +362,6 @@ class Wind:
             )
             self.motor2_pos = Motor2State.BOTTOM_RIGHT
 
-
     def prevent_collision(self, clockwise):
         if self.is_motor2_at_12oclock() and not clockwise:
             self.move_motor(
@@ -446,7 +445,7 @@ class Wind:
                         abs(motor2_pos - init_motor2_pos),
                         self.m0_wind_range,
                         "ease-out-sine",
-                        self.logger
+                        self.logger,
                     )
                     self.move_motor(0, target_motor0_pos)
                     prev_motor2_pos = motor2_pos

@@ -30,5 +30,4 @@ def get_motor0_target_winding_position(
 		motor0_target = (
 			wind_range_distance * eased_progress + m0_wind_range[0]
 		)
-		logger.info(f"eased_progress: {round(eased_progress, 2)}, progress: {round(progress, 2)}, M0 target: {round(motor0_target, 2)}")
 		return motor0_target

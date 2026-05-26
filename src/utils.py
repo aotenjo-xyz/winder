@@ -65,7 +65,7 @@ def load_config(config_path):
 def get_wind_orders_and_slot_indices(winding_config: str):
     """
     Get winding orders and slot indices from winding configuration string.
-    You can find the winding configuration string at [Winding Scheme Calculator](https://www.bavaria-direct.co.za/scheme/calculator/)
+    You can find the winding configuration string on [our website](https://aotenjo.xyz/docs/winder/winding-config/)
 
     Example: "AaAabBbBCcCcaAaABbBbcCcC" for 24n22p motor (24 slots, 22 poles)
     """

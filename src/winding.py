@@ -462,7 +462,7 @@ class Wind:
         self.logger.info(f"Winding teeth {teeth_idx} done")
 
         # move motor 2 to the left to prevent collision
-        skip_prevent_collision_teeth_idx = [23]
+        skip_prevent_collision_teeth_idx = [self.teeth_count - 1]
         if teeth_idx not in skip_prevent_collision_teeth_idx:
             self.prevent_collision(clockwise)
         sleep(0.7)

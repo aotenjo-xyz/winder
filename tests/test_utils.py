@@ -6,7 +6,9 @@ from src.utils import (
 
 
 def test_get_winding_teeth_indices_24n22p():
-    winding_config_letters = "AaAabBbBCcCcaAaABbBbcCcC" # for 24n22p motor (24 slots, 22 poles)
+    winding_config_letters = (
+        "AaAabBbBCcCcaAaABbBbcCcC"  # for 24n22p motor (24 slots, 22 poles)
+    )
     teeth_indices = get_winding_teeth_indices(winding_config_letters)
 
     teeth_indices_a = [0, 1, 2, 3, 12, 13, 14, 15]
@@ -25,7 +27,9 @@ def test_get_current_slot():
 
 
 def test_is_starting_from_bottom_24n22p():
-    winding_config_letters = "AaAabBbBCcCcaAaABbBbcCcC" # for 24n22p motor (24 slots, 22 poles)
+    winding_config_letters = (
+        "AaAabBbBCcCcaAaABbBbcCcC"  # for 24n22p motor (24 slots, 22 poles)
+    )
     teeth_indices_a = [0, 1, 2, 3, 12, 13, 14, 15]
     teeth_indices_b = [4, 5, 6, 7, 16, 17, 18, 19]
     teeth_indices_c = [8, 9, 10, 11, 20, 21, 22, 23]
@@ -42,10 +46,16 @@ def test_is_starting_from_bottom_24n22p():
     ]
 
     for i, expected in enumerate(expected_results_a_c):
-        assert is_starting_from_bottom(i, winding_config_letters, teeth_indices_a) is expected
+        assert (
+            is_starting_from_bottom(i, winding_config_letters, teeth_indices_a)
+            is expected
+        )
 
     for i, expected in enumerate(expected_results_a_c):
-        assert is_starting_from_bottom(i, winding_config_letters, teeth_indices_c) is expected
+        assert (
+            is_starting_from_bottom(i, winding_config_letters, teeth_indices_c)
+            is expected
+        )
 
     expected_results_b = [
         False,  # starts_at = 0
@@ -59,4 +69,7 @@ def test_is_starting_from_bottom_24n22p():
     ]
 
     for i, expected in enumerate(expected_results_b):
-        assert is_starting_from_bottom(i, winding_config_letters, teeth_indices_b) is expected
+        assert (
+            is_starting_from_bottom(i, winding_config_letters, teeth_indices_b)
+            is expected
+        )

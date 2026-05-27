@@ -37,7 +37,7 @@ class MotorPosition(BaseModel):
 
 class Wind:
 
-    def __init__(self, config_path, simulation=False, turns_per_slot=None):
+    def __init__(self, config_path, simulation=False, turns=None):
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
         self.config = load_config(config_path)
@@ -65,17 +65,11 @@ class Wind:
 
         self.logger = init_logger()
 
-        self.turns_per_slot = (
-            turns_per_slot
-            if turns_per_slot is not None
-            else self.config["winding"]["turns_per_slot"]
-        )
+        self.turns = turns if turns is not None else self.config["winding"]["turns"]
         self.winding_config = self.config["winding"]["winding_config"]
         self.slot_count = len(self.winding_config)
         self.num_of_tooth_to_wind = get_num_of_tooth_to_wind(self.winding_config)
-        self.teeth_index_matrix = get_winding_teeth_indices(
-            self.winding_config
-        )
+        self.teeth_index_matrix = get_winding_teeth_indices(self.winding_config)
 
         self.m0_wind_range = (
             self.config["motor"]["M0"]["wind_range_start"],
@@ -273,7 +267,10 @@ class Wind:
         For 24n22p motor, self.num_of_tooth_to_wind = 8
         At wind_idx = 3, 7, motor2 should be at 12 o'clock
         """
-        wind_indices = [int(self.num_of_tooth_to_wind / 2 - 1), self.num_of_tooth_to_wind - 1]
+        wind_indices = [
+            int(self.num_of_tooth_to_wind / 2 - 1),
+            self.num_of_tooth_to_wind - 1,
+        ]
         return wind_idx in wind_indices
 
     def is_motor2_at_top(self):
@@ -292,9 +289,9 @@ class Wind:
         """
         motor2_at_12oclock = self.is_motor2_at_top()
         # motor2_at_12oclock = self.is_motor2_at_12oclock()
-        target_motor2_pos = self.motor_positions[
-            2
-        ] + math.pi * 2 * self.turns_per_slot * (1 if clockwise else -1)
+        target_motor2_pos = self.motor_positions[2] + math.pi * 2 * self.turns * (
+            1 if clockwise else -1
+        )
         if self.motor2_pos == Motor2State.TOP_RIGHT:
             target_motor2_pos = (
                 target_motor2_pos - self.m2_angle_to_prevent_collision

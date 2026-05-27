@@ -67,7 +67,7 @@ class Wind:
 
         self.turns = turns if turns is not None else self.config["winding"]["turns"]
         self.winding_config = self.config["winding"]["winding_config"]
-        self.slot_count = len(self.winding_config)
+        self.teeth_count = len(self.winding_config)
         self.num_of_tooth_to_wind = get_num_of_tooth_to_wind(self.winding_config)
         self.teeth_index_matrix = get_winding_teeth_indices(self.winding_config)
 
@@ -240,13 +240,14 @@ class Wind:
             )
         return motor_position
 
-    def move_to_slot(self, slot_idx: int):
+    def move_to_teeth(self, teeth_idx: int):
         # k = 0.9958
         k = 1
         # winding counter-clockwise
         direction = -1
         self.move_motor(
-            1, self.m1_zero + direction * (math.pi * 2 / self.slot_count) * slot_idx * k
+            1,
+            self.m1_zero + direction * (math.pi * 2 / self.teeth_count) * teeth_idx * k,
         )
 
     def is_motor2_at_12oclock(self, _motor2_pos=None):
@@ -301,7 +302,7 @@ class Wind:
             target_motor2_pos = target_motor2_pos + self.m2_angle_to_prevent_collision
             self.motor2_pos = Motor2State.BOTTOM
 
-        # motor2 should be at 12 o'clock after winding the last slot
+        # motor2 should be at 12 o'clock after winding the last teeth
         if (
             motor2_at_12oclock
             and clockwise
@@ -312,9 +313,9 @@ class Wind:
 
         return target_motor2_pos
 
-    def move_wire_to_right_position(self, slot_idx):
-        # move to slot_idx - 1 and rotate motor2 by 180 degrees clockwise
-        self.move_to_slot(slot_idx - 1)
+    def move_wire_to_right_position(self, teeth_idx):
+        # move to teeth_idx - 1 and rotate motor2 by 180 degrees clockwise
+        self.move_to_teeth(teeth_idx - 1)
         sleep(0.7)
         self.move_motor(0, self.m0_wind_range[0])
         sleep(1)
@@ -411,12 +412,12 @@ class Wind:
             return current_motor2_pos + self.m2_angle_to_prevent_collision
         return current_motor2_pos
 
-    def wind_slot(self, slot_idx: int, clockwise, wind_idx):
+    def wind_wire(self, teeth_idx: int, clockwise, wind_idx):
         if wind_idx == int(self.num_of_tooth_to_wind / 2) and not clockwise:
-            self.move_wire_to_right_position(slot_idx)
+            self.move_wire_to_right_position(teeth_idx)
 
         # rotate motor1
-        self.move_to_slot(slot_idx)
+        self.move_to_teeth(teeth_idx)
         self.set_wire_tension(1)
         self.move_motor(0, self.m0_wind_range[1])
         sleep(0.8)
@@ -458,11 +459,11 @@ class Wind:
             abs(motor2_pos - target_motor2_pos) < 0.1
         ), f"motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}"
 
-        self.logger.info(f"Winding slot {slot_idx} done")
+        self.logger.info(f"Winding teeth {teeth_idx} done")
 
         # move motor 2 to the left to prevent collision
-        skip_prevent_collision_slot_idx = [23]
-        if slot_idx not in skip_prevent_collision_slot_idx:
+        skip_prevent_collision_teeth_idx = [23]
+        if teeth_idx not in skip_prevent_collision_teeth_idx:
             self.prevent_collision(clockwise)
         sleep(0.7)
 
@@ -470,8 +471,8 @@ class Wind:
         sleep(1.5)
 
     def wind(self, wire_idx: int):
-        start_slot_idx = self.teeth_index_matrix[wire_idx][self.starts_at]
-        self.move_to_slot(start_slot_idx)
+        start_teeth_idx = self.teeth_index_matrix[wire_idx][self.starts_at]
+        self.move_to_teeth(start_teeth_idx)
         sleep(0.5)
 
         if is_starting_from_bottom(
@@ -482,7 +483,7 @@ class Wind:
             if not self.simulation:
                 sleep(15)
 
-        for i in range(self.starts_at, int(self.slot_count / 3)):
+        for i in range(self.starts_at, self.num_of_tooth_to_wind):
             teeth_idx = self.teeth_index_matrix[wire_idx][i]
             clockwise = is_clockwise(self.winding_config, teeth_idx)
             if self.starts_at == i and i != 0:
@@ -491,14 +492,14 @@ class Wind:
 
                 self.move_motor(0, self.m1_rotating_position)
 
-            self.wind_slot(teeth_idx, clockwise, i)
+            self.wind_wire(teeth_idx, clockwise, i)
 
         self.logger.info(f"Winding wire {wire_idx} done")
 
     def wind_wire_around_shaft(self, wire_idx: int):
         # Move M1
-        # start_slot_idx = self.teeth_index_matrix[wire_idx + 1][0]
-        # self.move_to_slot(start_slot_idx)
+        # start_teeth_idx = self.teeth_index_matrix[wire_idx + 1][0]
+        # self.move_to_teeth(start_teeth_idx)
         # sleep(0.5)
 
         motor1_pos = self.get_motor_position(1)

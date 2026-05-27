@@ -1,6 +1,6 @@
 from src.utils import (
     get_winding_teeth_indices,
-    get_current_slot,
+    get_current_teeth,
     is_starting_from_bottom,
 )
 
@@ -48,12 +48,12 @@ def test_get_winding_teeth_indices_36n40p():
     assert teeth_indices == teeth_indices_36n40p
 
 
-def test_get_current_slot():
+def test_get_current_teeth():
     m1_zero = -0.01
-    slot_count = 24
+    teeth_count = 24
     motor1_pos = -0.534
-    current_slot = get_current_slot(motor1_pos, m1_zero, slot_count)
-    assert current_slot == 2
+    current_teeth = get_current_teeth(motor1_pos, m1_zero, teeth_count)
+    assert current_teeth == 2
 
 
 def test_is_starting_from_bottom_24n22p():

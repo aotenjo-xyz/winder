@@ -112,9 +112,9 @@ def is_starting_from_bottom(starts_at: int, winding_config: str, teeth_indices) 
     return is_clockwise(winding_config, prev_teeth_idx)
 
 
-def get_current_slot(motor1_pos, m1_zero, slot_count):
+def get_current_teeth(motor1_pos, m1_zero, teeth_count):
     diff = abs(m1_zero - motor1_pos)
-    slot_number = int(round(diff / ((math.pi * 2) / slot_count)))
-    if slot_number >= slot_count:
-        return slot_number % slot_count
-    return slot_number
+    teeth_number = int(round(diff / ((math.pi * 2) / teeth_count)))
+    if teeth_number >= teeth_count:
+        return teeth_number % teeth_count
+    return teeth_number

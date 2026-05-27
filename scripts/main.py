@@ -34,15 +34,15 @@ def main(wind: Wind):
         elif key == "z":
             wind.back_to_zero()
 
-        elif len(key) > 1 and key[0] == "s":
-            slot = int(key[1:])
-            wind.move_to_slot(slot)
+        elif len(key) > 1 and key[0] == "t":
+            teeth_idx = int(key[1:])
+            wind.move_to_teeth(teeth_idx)
 
         elif key == "e":
             wind.estop()
             break
 
-        elif key == "t":
+        elif key == "s":
             m2_pos = wind.get_motor_position(2)
             print(m2_pos)
             break
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     simulation = "--simulation" in sys.argv or "-s" in sys.argv
     config_file = "settings.yml"
     if simulation:
-        config_file = "dev-settings.yml"
+        config_file = "tests/dev-24n22p-settings.yml"
     wind = Wind(config_file, simulation)
     try:
         main(wind)

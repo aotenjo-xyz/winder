@@ -25,7 +25,6 @@ motor:
     velocity: 5.0
 
 winding:
-  # production
   turns: 15
   starts_at: 0
   winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p

@@ -35,30 +35,12 @@ winding_config_letters_36n40p = (
 
 
 def test_is_skipping_24n22p():
-    assert not is_skipping(winding_config_letters_24n22p, 0)
-    assert not is_skipping(winding_config_letters_24n22p, 1)
-    assert not is_skipping(winding_config_letters_24n22p, 2)
-    assert not is_skipping(winding_config_letters_24n22p, 3)
-    assert not is_skipping(winding_config_letters_24n22p, 4)
-    assert not is_skipping(winding_config_letters_24n22p, 5)
-    assert not is_skipping(winding_config_letters_24n22p, 6)
-    assert not is_skipping(winding_config_letters_24n22p, 7)
-    assert not is_skipping(winding_config_letters_24n22p, 8)
-    assert not is_skipping(winding_config_letters_24n22p, 9)
-    assert not is_skipping(winding_config_letters_24n22p, 10)
-    assert not is_skipping(winding_config_letters_24n22p, 11)
-    assert is_skipping(winding_config_letters_24n22p, 12)
-    assert not is_skipping(winding_config_letters_24n22p, 13)
-    assert not is_skipping(winding_config_letters_24n22p, 14)
-    assert not is_skipping(winding_config_letters_24n22p, 15)
-    assert is_skipping(winding_config_letters_24n22p, 16)
-    assert not is_skipping(winding_config_letters_24n22p, 17)
-    assert not is_skipping(winding_config_letters_24n22p, 18)
-    assert not is_skipping(winding_config_letters_24n22p, 19)
-    assert is_skipping(winding_config_letters_24n22p, 20)
-    assert not is_skipping(winding_config_letters_24n22p, 21)
-    assert not is_skipping(winding_config_letters_24n22p, 22)
-    assert not is_skipping(winding_config_letters_24n22p, 23)
+    skipping_indices = {12, 16, 20}
+
+    for index in range(len(winding_config_letters_24n22p)):
+        assert is_skipping(winding_config_letters_24n22p, index) == (
+            index in skipping_indices
+        )
 
 
 def test_is_skipping_12n14p():

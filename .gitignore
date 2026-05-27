@@ -177,3 +177,4 @@ motors.db
 *.blend1
 
 .vscode/
+settings.yml

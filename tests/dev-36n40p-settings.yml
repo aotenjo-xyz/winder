@@ -27,5 +27,5 @@ motor:
 winding:
   turns: 15
   starts_at: 0
-  winding_config: "AabBCcaABbcCAabBCcaABbcCAabBCcaABbcC" # 36n40p
+  winding_config: "AaABbBCcCAaABbBCcCAaABbBCcCAaABbBCcC" # 36n40p
   dont_move_m3: false # true for debugging, false for production

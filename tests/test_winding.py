@@ -1,10 +1,20 @@
-from src.winding import Wind
+import time
 
+import pytest
+import src.winding as winding_module
+from src.winding import Wind
 
 turns = 5  # Use a smaller number for testing
 config_file_24n22p = "tests/dev-24n22p-settings.yml"
 config_file_12n14p = "tests/dev-12n14p-settings.yml"
 config_file_36n40p = "tests/dev-36n40p-settings.yml"
+
+
+@pytest.fixture(autouse=True)
+def disable_sleep(monkeypatch):
+    monkeypatch.setattr(
+        winding_module, "sleep", lambda seconds: time.sleep(min(seconds, 0.35))
+    )
 
 
 def test_winding_wire0_24n22p():

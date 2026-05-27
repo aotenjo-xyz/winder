@@ -5,8 +5,10 @@ from .config import rotating_directions, m2_gear_ratio
 from .utils import (
     init_logger,
     load_config,
-    get_wind_orders_and_slot_indices,
+    get_winding_teeth_indices,
     is_starting_from_bottom,
+    is_clockwise,
+    get_num_of_tooth_to_wind,
 )
 from enum import Enum
 from datetime import datetime
@@ -68,10 +70,11 @@ class Wind:
             if turns_per_slot is not None
             else self.config["winding"]["turns_per_slot"]
         )
-        winding_config = self.config["winding"]["winding_config"]
-        self.slot_count = len(winding_config)
-        self.wind_orders, self.slot_index_matrix = get_wind_orders_and_slot_indices(
-            winding_config
+        self.winding_config = self.config["winding"]["winding_config"]
+        self.slot_count = len(self.winding_config)
+        self.num_of_tooth_to_wind = get_num_of_tooth_to_wind(self.winding_config)
+        self.teeth_index_matrix = get_winding_teeth_indices(
+            self.winding_config
         )
 
         self.m0_wind_range = (
@@ -267,10 +270,10 @@ class Wind:
 
     def is_motor2_should_be_at_12oclock(self, wind_idx):
         """
-        For 24n22p motor, self.wind_slot_count = 8
+        For 24n22p motor, self.num_of_tooth_to_wind = 8
         At wind_idx = 3, 7, motor2 should be at 12 o'clock
         """
-        wind_indices = [int(self.wind_slot_count / 2 - 1), self.wind_slot_count - 1]
+        wind_indices = [int(self.num_of_tooth_to_wind / 2 - 1), self.num_of_tooth_to_wind - 1]
         return wind_idx in wind_indices
 
     def is_motor2_at_top(self):
@@ -412,7 +415,7 @@ class Wind:
         return current_motor2_pos
 
     def wind_slot(self, slot_idx: int, clockwise, wind_idx):
-        if wind_idx == int(self.wind_slot_count / 2) and not clockwise:
+        if wind_idx == int(self.num_of_tooth_to_wind / 2) and not clockwise:
             self.move_wire_to_right_position(slot_idx)
 
         # rotate motor1
@@ -470,15 +473,12 @@ class Wind:
         sleep(1.5)
 
     def wind(self, wire_idx: int):
-        wind_order = self.wind_orders[wire_idx]
-        self.wind_slot_count = len(self.wind_orders[wire_idx])
-
-        start_slot_idx = self.slot_index_matrix[wire_idx][self.starts_at]
+        start_slot_idx = self.teeth_index_matrix[wire_idx][self.starts_at]
         self.move_to_slot(start_slot_idx)
         sleep(0.5)
 
         if is_starting_from_bottom(
-            self.starts_at, wind_order, self.slot_index_matrix[wire_idx]
+            self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
         ):
             # starting from the bottom
             self.move_motor(2, self.m2_zero + math.pi)
@@ -486,14 +486,14 @@ class Wind:
                 sleep(15)
 
         for i in range(self.starts_at, int(self.slot_count / 3)):
-            clockwise = wind_order[i]
+            clockwise = is_clockwise(self.winding_config, i)
             if self.starts_at == i and i != 0:
                 self.prevent_collision(clockwise)
                 sleep(0.3)
 
                 self.move_motor(0, self.m1_rotating_position)
 
-            slot_idx = self.slot_index_matrix[wire_idx][i]
+            slot_idx = self.teeth_index_matrix[wire_idx][i]
 
             self.wind_slot(slot_idx, clockwise, i)
 
@@ -501,7 +501,7 @@ class Wind:
 
     def wind_wire_around_shaft(self, wire_idx: int):
         # Move M1
-        # start_slot_idx = self.slot_index_matrix[wire_idx + 1][0]
+        # start_slot_idx = self.teeth_index_matrix[wire_idx + 1][0]
         # self.move_to_slot(start_slot_idx)
         # sleep(0.5)
 

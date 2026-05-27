@@ -483,16 +483,15 @@ class Wind:
                 sleep(15)
 
         for i in range(self.starts_at, int(self.slot_count / 3)):
-            clockwise = is_clockwise(self.winding_config, i)
+            teeth_idx = self.teeth_index_matrix[wire_idx][i]
+            clockwise = is_clockwise(self.winding_config, teeth_idx)
             if self.starts_at == i and i != 0:
                 self.prevent_collision(clockwise)
                 sleep(0.3)
 
                 self.move_motor(0, self.m1_rotating_position)
 
-            slot_idx = self.teeth_index_matrix[wire_idx][i]
-
-            self.wind_slot(slot_idx, clockwise, i)
+            self.wind_slot(teeth_idx, clockwise, i)
 
         self.logger.info(f"Winding wire {wire_idx} done")
 

@@ -1,5 +1,5 @@
 # Configuration file for winding machine
-# production settings
+# simulation settings
 
 serial:
   port: "/dev/ttyACM0"
@@ -10,13 +10,13 @@ motor:
     wind_range_end: -14.0
     wind_range_start: -25.5
     end_to_zero: 9.0
-    velocity: 5.0
+    velocity: 10.0
   M1:
-    zero: -0.04
+    zero: 0.0
     end_to_rotating_position: 6.0
-    velocity: 5.0
+    velocity: 1.0
   M2:
-    zero: 0.23
+    zero: 0.0
     angle_to_prevent_collision: 1.0
     velocity: 20.0
   M3:
@@ -25,8 +25,7 @@ motor:
     velocity: 5.0
 
 winding:
-  # production
-  turns: 75
+  turns: 15
   starts_at: 0
   winding_config: "AaAabBbBCcCcaAaABbBbcCcC" # 24n22p
   dont_move_m3: false # true for debugging, false for production

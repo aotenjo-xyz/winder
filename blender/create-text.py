@@ -1,5 +1,5 @@
-# Create text objects to display the slot numbers in a circular pattern in Blender
-# This way you can see the stator positions and which slot the machine is currently winding at.
+# Create text objects to display the teeth numbers in a circular pattern in Blender
+# This way you can see the stator positions and which teeth the machine is currently winding at.
 import bpy
 import math
 

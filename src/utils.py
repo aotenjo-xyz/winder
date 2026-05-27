@@ -62,56 +62,58 @@ def load_config(config_path):
     return config
 
 
-def get_wind_orders_and_slot_indices(winding_config: str):
+def get_winding_teeth_indices(winding_config: str):
     """
-    Get winding orders and slot indices from winding configuration string.
-    You can find the winding configuration string at [Winding Scheme Calculator](https://www.bavaria-direct.co.za/scheme/calculator/)
+    Get winding teeth indices from winding configuration string.
+    You can find the winding configuration string on [our website](https://aotenjo.xyz/docs/winder/winding-config/)
 
     Example: "AaAabBbBCcCcaAaABbBbcCcC" for 24n22p motor (24 slots, 22 poles)
     """
     only_small_letters = winding_config.lower()
-    slot_indices_a = []
-    slot_indices_b = []
-    slot_indices_c = []
+    teeth_indices_a = []
+    teeth_indices_b = []
+    teeth_indices_c = []
     for i, letter in enumerate(only_small_letters):
         if letter == "a":
-            slot_indices_a.append(i)
+            teeth_indices_a.append(i)
         elif letter == "b":
-            slot_indices_b.append(i)
+            teeth_indices_b.append(i)
         elif letter == "c":
-            slot_indices_c.append(i)
-    slot_index_matrix = [slot_indices_a, slot_indices_b, slot_indices_c]
+            teeth_indices_c.append(i)
+    teeth_index_matrix = [teeth_indices_a, teeth_indices_b, teeth_indices_c]
 
-    wind_orders = []
-    for slot_indices in slot_index_matrix:
-        wind_order = []
-        for slot_idx in slot_indices:
-            letter = winding_config[slot_idx]
-            if letter.isupper():
-                wind_order.append(0)
-            else:
-                wind_order.append(1)
-        wind_orders.append(wind_order)
-    return wind_orders, slot_index_matrix
+    return teeth_index_matrix
 
 
-def is_starting_from_bottom(starts_at: int, wind_order, slot_indices) -> bool:
+def is_clockwise(winding_config: str, teeth_idx: int):
+    letter = winding_config[teeth_idx]
+    return letter.islower()
+
+
+def get_num_of_tooth_to_wind(winding_config: str):
+    # Assuming the winding configuration is valid and has 3 wires, the number of teeth to wind for each wire can be calculated as the total length of the winding configuration divided by 3.
+    if len(winding_config) % 3 != 0:
+        raise ValueError("Winding configuration length must be a multiple of 3.")
+    return len(winding_config) // 3
+
+
+def is_starting_from_bottom(starts_at: int, winding_config: str, teeth_indices) -> bool:
     """
     Determine if the winding starts from the bottom based on the starting position and wire index.
     """
     if starts_at == 0:
         return False
-    slot_idx = slot_indices[starts_at]
-    prev_slot_idx = slot_indices[starts_at - 1]
-    if slot_idx - prev_slot_idx != 1:
+    teeth_idx = teeth_indices[starts_at]
+    prev_teeth_idx = teeth_indices[starts_at - 1]
+    if teeth_idx - prev_teeth_idx != 1:
         return False
 
-    return wind_order[starts_at - 1] == 1
+    return is_clockwise(winding_config, prev_teeth_idx)
 
 
-def get_current_slot(motor1_pos, m1_zero, slot_count):
+def get_current_teeth(motor1_pos, m1_zero, teeth_count):
     diff = abs(m1_zero - motor1_pos)
-    slot_number = int(round(diff / ((math.pi * 2) / slot_count)))
-    if slot_number >= slot_count:
-        return slot_number % slot_count
-    return slot_number
+    teeth_number = int(round(diff / ((math.pi * 2) / teeth_count)))
+    if teeth_number >= teeth_count:
+        return teeth_number % teeth_count
+    return teeth_number

@@ -175,3 +175,5 @@ cython_debug/
 
 motors.db
 *.blend1
+
+.vscode/

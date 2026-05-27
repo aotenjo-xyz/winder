@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import json
-from src.utils import load_config, get_current_slot
+from src.utils import load_config, get_current_teeth
 from src.db import get_all_motors
 from datetime import datetime
 import sqlite3
@@ -20,7 +20,7 @@ motor_velocities = [
 ]
 
 m1_zero = config["motor"]["M1"]["zero"]
-slot_count = len(config["winding"]["winding_config"])
+teeth_count = len(config["winding"]["winding_config"])
 
 
 def calculate_motor_position(motor_id, all_motors):
@@ -49,13 +49,13 @@ async def handler(websocket):
     while True:
         all_motors = get_all_motors(conn)
         motor1_pos = calculate_motor_position(1, all_motors)
-        current_slot = get_current_slot(motor1_pos, m1_zero, slot_count)
+        current_teeth = get_current_teeth(motor1_pos, m1_zero, teeth_count)
         motor_positions = {
             "M0": calculate_motor_position(0, all_motors),
             "M1": motor1_pos,
             "M2": calculate_motor_position(2, all_motors),
             "M3": calculate_motor_position(3, all_motors),
-            "slot": current_slot,
+            "teeth": current_teeth,
         }
         await websocket.send(json.dumps(motor_positions))
         await asyncio.sleep(frame_duration)

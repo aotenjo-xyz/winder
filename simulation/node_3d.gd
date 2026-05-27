@@ -22,12 +22,12 @@ func _on_connection_established():
 	print("Connected to Python WebSocket")
 
 func show_motor_positions(motor_positions: Variant):
-	var text := "M0: %s\nM1: %s\nM2: %s\nM3: %s\nSlot: %s" % [
+	var text := "M0: %s\nM1: %s\nM2: %s\nM3: %s\nTeeth: %s" % [
 		motor_positions["M0"],
 		motor_positions["M1"],
 		motor_positions["M2"],
 		motor_positions["M3"],
-		int(motor_positions["slot"])
+		int(motor_positions["teeth"])
 	]
 	$CanvasLayer/Label.text = text
 	

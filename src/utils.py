@@ -92,9 +92,8 @@ def is_clockwise(winding_config: str, teeth_idx: int):
 
 def get_num_of_tooth_to_wind(winding_config: str):
     # Assuming the winding configuration is valid and has 3 wires, the number of teeth to wind for each wire can be calculated as the total length of the winding configuration divided by 3.
-    assert (
-        len(winding_config) % 3 == 0
-    ), "Winding configuration length must be a multiple of 3."
+    if len(winding_config) % 3 != 0:
+        raise ValueError("Winding configuration length must be a multiple of 3.")
     return len(winding_config) // 3
 
 

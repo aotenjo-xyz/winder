@@ -4,18 +4,35 @@ from src.utils import (
     is_starting_from_bottom,
 )
 
+teeth_indices_24n22p = [
+    [0, 1, 2, 3, 12, 13, 14, 15],
+    [4, 5, 6, 7, 16, 17, 18, 19],
+    [8, 9, 10, 11, 20, 21, 22, 23],
+]
+
+teeth_indices_36n40p = [
+    [0, 1, 2, 9, 10, 11, 18, 19, 20, 27, 28, 29],
+    [3, 4, 5, 12, 13, 14, 21, 22, 23, 30, 31, 32],
+    [6, 7, 8, 15, 16, 17, 24, 25, 26, 33, 34, 35],
+]
+
+winding_config_letters_24n22p = (
+    "AaAabBbBCcCcaAaABbBbcCcC"  # for 24n22p motor (24 slots, 22 poles)
+)
+
+winding_config_letters_36n40p = (
+    "AaABbBCcCAaABbBCcCAaABbBCcCAaABbBCcC"  # for 36n40p motor (36 slots, 40 poles)
+)
+
 
 def test_get_winding_teeth_indices_24n22p():
-    winding_config_letters = (
-        "AaAabBbBCcCcaAaABbBbcCcC"  # for 24n22p motor (24 slots, 22 poles)
-    )
-    teeth_indices = get_winding_teeth_indices(winding_config_letters)
+    teeth_indices = get_winding_teeth_indices(winding_config_letters_24n22p)
+    assert teeth_indices == teeth_indices_24n22p
 
-    teeth_indices_a = [0, 1, 2, 3, 12, 13, 14, 15]
-    teeth_indices_b = [4, 5, 6, 7, 16, 17, 18, 19]
-    teeth_indices_c = [8, 9, 10, 11, 20, 21, 22, 23]
 
-    assert teeth_indices == [teeth_indices_a, teeth_indices_b, teeth_indices_c]
+def test_get_winding_teeth_indices_36n40p():
+    teeth_indices = get_winding_teeth_indices(winding_config_letters_36n40p)
+    assert teeth_indices == teeth_indices_36n40p
 
 
 def test_get_current_slot():
@@ -27,12 +44,9 @@ def test_get_current_slot():
 
 
 def test_is_starting_from_bottom_24n22p():
-    winding_config_letters = (
-        "AaAabBbBCcCcaAaABbBbcCcC"  # for 24n22p motor (24 slots, 22 poles)
-    )
-    teeth_indices_a = [0, 1, 2, 3, 12, 13, 14, 15]
-    teeth_indices_b = [4, 5, 6, 7, 16, 17, 18, 19]
-    teeth_indices_c = [8, 9, 10, 11, 20, 21, 22, 23]
+    teeth_indices_a = teeth_indices_24n22p[0]
+    teeth_indices_b = teeth_indices_24n22p[1]
+    teeth_indices_c = teeth_indices_24n22p[2]
 
     expected_results_a_c = [
         False,  # starts_at = 0
@@ -47,13 +61,13 @@ def test_is_starting_from_bottom_24n22p():
 
     for i, expected in enumerate(expected_results_a_c):
         assert (
-            is_starting_from_bottom(i, winding_config_letters, teeth_indices_a)
+            is_starting_from_bottom(i, winding_config_letters_24n22p, teeth_indices_a)
             is expected
         )
 
     for i, expected in enumerate(expected_results_a_c):
         assert (
-            is_starting_from_bottom(i, winding_config_letters, teeth_indices_c)
+            is_starting_from_bottom(i, winding_config_letters_24n22p, teeth_indices_c)
             is expected
         )
 
@@ -70,6 +84,45 @@ def test_is_starting_from_bottom_24n22p():
 
     for i, expected in enumerate(expected_results_b):
         assert (
-            is_starting_from_bottom(i, winding_config_letters, teeth_indices_b)
+            is_starting_from_bottom(i, winding_config_letters_24n22p, teeth_indices_b)
+            is expected
+        )
+
+
+def test_is_starting_from_bottom_36n40p():
+    teeth_indices_a = teeth_indices_36n40p[0]
+    teeth_indices_b = teeth_indices_36n40p[1]
+    teeth_indices_c = teeth_indices_36n40p[2]
+
+    expected_results = [
+        False,  # starts_at = 0
+        False,  # starts_at = 1
+        True,  # starts_at = 2
+        False,  # starts_at = 3
+        False,  # starts_at = 4
+        True,  # starts_at = 5
+        False,  # starts_at = 6
+        False,  # starts_at = 7
+        True,  # starts_at = 8
+        False,  # starts_at = 9
+        False,  # starts_at = 10
+        True,  # starts_at = 11
+    ]
+
+    for i, expected in enumerate(expected_results):
+        assert (
+            is_starting_from_bottom(i, winding_config_letters_36n40p, teeth_indices_a)
+            is expected
+        )
+
+    for i, expected in enumerate(expected_results):
+        assert (
+            is_starting_from_bottom(i, winding_config_letters_36n40p, teeth_indices_c)
+            is expected
+        )
+
+    for i, expected in enumerate(expected_results):
+        assert (
+            is_starting_from_bottom(i, winding_config_letters_36n40p, teeth_indices_b)
             is expected
         )

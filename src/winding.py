@@ -9,6 +9,7 @@ from .utils import (
     is_starting_from_bottom,
     is_clockwise,
     get_num_of_tooth_to_wind,
+    is_skipping,
 )
 from enum import Enum
 from datetime import datetime
@@ -413,9 +414,6 @@ class Wind:
         return current_motor2_pos
 
     def wind_wire(self, teeth_idx: int, clockwise, wind_idx):
-        if wind_idx == int(self.num_of_tooth_to_wind / 2) and not clockwise:
-            self.move_wire_to_right_position(teeth_idx)
-
         # rotate motor1
         self.move_to_teeth(teeth_idx)
         self.set_wire_tension(1)
@@ -491,6 +489,9 @@ class Wind:
                 sleep(0.3)
 
                 self.move_motor(0, self.m1_rotating_position)
+
+            if is_skipping(self.winding_config, teeth_idx) and not clockwise:
+                self.move_wire_to_right_position(teeth_idx)
 
             self.wind_wire(teeth_idx, clockwise, i)
 

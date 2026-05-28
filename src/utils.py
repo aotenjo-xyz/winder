@@ -117,3 +117,16 @@ def get_current_teeth(motor1_pos, m1_zero, teeth_count):
     if teeth_number >= teeth_count:
         return teeth_number % teeth_count
     return teeth_number
+
+
+def is_skipping(winding_config: str, teeth_idx: int) -> bool:
+    cfg = winding_config.lower()  # Convert to lowercase for case-insensitive comparison
+    # get first index of the current character in the winding configuration
+    # e.g. when winding_config = "AaAabBbBCcCcaAaABbBbcCcC", the first index of 'a' is 0, the first index of 'b' is 4, the first index of 'c' is 9
+    starting_char = cfg[teeth_idx]
+    starting_char_first_index = cfg.index(starting_char)
+    if teeth_idx == starting_char_first_index:
+        return False
+    current_char = cfg[teeth_idx]
+    prev_char = cfg[teeth_idx - 1]
+    return current_char != prev_char

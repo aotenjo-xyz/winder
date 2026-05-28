@@ -75,3 +75,12 @@ def test_winding_wire2_36n40p():
 def test_continuous_winding_36n40p():
     wind = Wind(config_file_36n40p, True, turns=turns)
     wind.continuous_winding()
+
+
+def test_move_wire_to_right_position_calls_36n40p():
+    """Verify move_wire_to_right_position is called at the expected teeth indices for 36n40p wire 0."""
+    wind = Wind(config_file_36n40p, True, turns=turns)
+    called_with = []
+    wind.move_wire_to_right_position = lambda teeth_idx: called_with.append(teeth_idx)
+    wind.wind(0)
+    assert called_with == [9, 18, 27]

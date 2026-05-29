@@ -49,5 +49,5 @@ simulate:
 	@echo "Starting winding simulation and WebSocket server..."
 	@python scripts/main.py -s & MAIN_PID=$$!; \
 	python scripts/ws.py & WS_PID=$$!; \
-	"$(SIM_BINARY)"; \
-	kill $$MAIN_PID $$WS_PID 2>/dev/null || true
+	trap 'kill $$MAIN_PID $$WS_PID 2>/dev/null || true' EXIT INT TERM; \
+	"$(SIM_BINARY)"

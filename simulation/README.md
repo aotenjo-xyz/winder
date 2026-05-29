@@ -42,6 +42,29 @@ make export-simulation
 
 This produces `simulation/bin/simulation.x86_64`. Export templates must be installed in Godot beforehand (`Editor → Manage Export Templates`).
 
+### Build for other platforms
+
+The Makefile supports preset-driven exports:
+
+```bash
+make export-simulation-linux
+make export-simulation-windows
+make export-simulation-macos
+```
+
+Equivalent generic form:
+
+```bash
+make export-simulation SIM_EXPORT_PRESET="Windows" SIM_EXPORT_PATH="bin/simulation.exe"
+make export-simulation SIM_EXPORT_PRESET="macOS" SIM_EXPORT_PATH="bin/simulation.app"
+```
+
+Important: Godot must have matching export presets named `Linux`, `Windows`, and `macOS` in `simulation/export_presets.cfg`. These presets are included in this repository; if you edit them in Godot (`Project -> Export`), save the updated file.
+
+Notes:
+- Windows export from Linux/macOS usually works with templates only.
+- macOS export can be produced on Linux, but signing and notarization typically require macOS tooling.
+
 ### Godot executable setup
 
 The Makefile uses `godot` by default. For team portability, avoid committing machine-specific paths.

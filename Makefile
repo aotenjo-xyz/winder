@@ -31,7 +31,7 @@ export-simulation:
 	if ! command -v "$$GODOT_BIN" >/dev/null 2>&1 && [ ! -x "$$GODOT_BIN" ]; then \
 		echo "Godot executable not found: $$GODOT_BIN"; \
 		echo "Run with GODOT set to your binary path, e.g."; \
-		echo "  make export-simulation"; \
+		echo "  make GODOT=/absolute/path/to/Godot export-simulation"; \
 		exit 127; \
 	fi; \
 	cd simulation && "$$GODOT_BIN" --headless --export-release "$(SIM_EXPORT_PRESET)" "$(SIM_EXPORT_PATH)"

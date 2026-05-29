@@ -100,6 +100,11 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      - name: Show configured export presets
+        shell: bash
+        run: |
+          grep -E '^name="' simulation/export_presets.cfg || true
+
       - name: Export simulation
         shell: bash
         run: |

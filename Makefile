@@ -6,7 +6,7 @@
 GODOT ?= godot
 SIM_EXPORT_PRESET ?= Linux
 SIM_EXPORT_PATH ?= bin/simulation.x86_64
-SIM_BINARY ?= simulation/bin/simulation.x86_64
+SIM_BINARY ?= simulation/$(SIM_EXPORT_PATH)
 
 format:
 	black .

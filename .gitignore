@@ -175,6 +175,7 @@ cython_debug/
 
 motors.db
 *.blend1
+.make.local
 
 .vscode/
 settings.yml

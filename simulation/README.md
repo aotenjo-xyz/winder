@@ -30,7 +30,83 @@ scripts/ws.py: This script implements a WebSocket server to stream motor data to
    conda env create -f scripts/environment.yml
    ```
 
-## Quickstart
+## Build
+
+Export the Godot project to a standalone binary (no Godot editor required to run):
+
+```bash
+conda activate winding
+export PYTHONPATH=$PWD
+make export-simulation
+```
+
+This produces `simulation/bin/simulation.x86_64`. Export templates must be installed in Godot beforehand (`Editor → Manage Export Templates`).
+
+### Build for other platforms
+
+The Makefile supports preset-driven exports:
+
+```bash
+make export-simulation-linux
+make export-simulation-windows
+make export-simulation-macos
+```
+
+Equivalent generic form:
+
+```bash
+make export-simulation SIM_EXPORT_PRESET="Windows" SIM_EXPORT_PATH="bin/simulation.exe"
+make export-simulation SIM_EXPORT_PRESET="macOS" SIM_EXPORT_PATH="bin/simulation.app"
+```
+
+Important: Godot must have matching export presets named `Linux`, `Windows`, and `macOS` in `simulation/export_presets.cfg`. These presets are included in this repository; if you edit them in Godot (`Project -> Export`), save the updated file.
+
+Notes:
+- Windows export from Linux/macOS usually works with templates only.
+- macOS export can be produced on Linux, but signing and notarization typically require macOS tooling.
+
+### Godot executable setup
+
+The Makefile uses `godot` by default. For team portability, avoid committing machine-specific paths.
+
+Option 1 (recommended): add Godot to your `PATH`, then use:
+
+```bash
+make export-simulation
+```
+
+Option 2 (one-off override):
+
+```bash
+make GODOT="/absolute/path/to/Godot_v4.6.3-stable_linux.x86_64" export-simulation
+```
+
+Option 3 (local persistent override): create an untracked `.make.local` file in the repository root:
+
+```make
+GODOT := /absolute/path/to/Godot_v4.6.3-stable_linux.x86_64
+```
+
+Then run:
+
+```bash
+make export-simulation
+```
+
+## Quickstart (built binary)
+
+After building, launch everything with a single command:
+
+```bash
+conda activate winding
+export PYTHONPATH=$PWD
+make simulate
+```
+
+This starts `main.py` in simulation mode, the WebSocket server, and the simulation window together. Enter `g` in the terminal to begin winding. Closing the simulation window stops all processes automatically.
+
+## Quickstart (Godot editor)
+
 1. Activate the conda environment:
    ```bash
    conda activate winding

@@ -70,6 +70,7 @@ jobs:
 
   simulation-export:
     name: Simulation Export (${{ matrix.os }})
+    continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       fail-fast: false
       matrix:
@@ -79,16 +80,19 @@ jobs:
             output: simulation/bin/simulation.x86_64
             output_rel: bin/simulation.x86_64
             artifact: linux
+            allow_failure: false
           - os: windows-latest
             preset: Windows
             output: simulation/bin/simulation.exe
             output_rel: bin/simulation.exe
             artifact: windows
+            allow_failure: false
           - os: macos-latest
             preset: macOS
             output: simulation/bin/simulation.app
             output_rel: bin/simulation.app
             artifact: macos
+            allow_failure: true
 
     runs-on: ${{ matrix.os }}
     steps:

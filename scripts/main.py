@@ -3,65 +3,81 @@ from time import sleep
 import sys
 
 
-def main(wind: Wind):
-    # wind.back_to_zero()
+def _prompt_choice(prompt: str, valid_choices: set[str]) -> str:
     while True:
-        key = input().strip()
-        if key == "k":
-            sleep(0.1)
+        choice = input(prompt).strip()
+        if choice in valid_choices:
+            return choice
+        print(f"Invalid choice: {choice}. Please choose one of {sorted(valid_choices)}")
 
+
+def _wind_menu(wind: Wind):
+    while True:
+        print("\nWinding options:")
+        print("1. wind wire 0")
+        print("2. wind wire 1")
+        print("3. wind wire 2")
+        print("4. continuous winding")
+        print("5. back")
+
+        choice = _prompt_choice("Choose an option: ", {"1", "2", "3", "4", "5"})
+        if choice == "1":
+            sleep(0.1)
             wind.wind(0)
             wind.move_motor(0, wind.m0_zero)
-
-        elif key == "j":
+        elif choice == "2":
             sleep(0.1)
-
             wind.wind(1)
             wind.move_motor(0, wind.m0_zero)
-
-        elif key == "h":
+        elif choice == "3":
             sleep(0.1)
-
             wind.wind(2)
             wind.move_motor(0, wind.m0_zero)
-
-        elif key == "g":
+        elif choice == "4":
             wind.continuous_winding()
-
-        elif key == "i":
-            wind.init_position()
-
-        elif key == "z":
-            wind.back_to_zero()
-
-        elif len(key) > 1 and key[0] == "t":
-            teeth_idx = int(key[1:])
-            wind.move_to_teeth(teeth_idx)
-
-        elif key == "e":
-            wind.estop()
-            break
-
-        elif key == "s":
-            m2_pos = wind.get_motor_position(2)
-            print(m2_pos)
-            break
-
-        elif key == "b":
-            m1_pos = wind.get_motor_position(1)
-            print(m1_pos)
-            break
-
-        elif key == "l":
-            ports = wind.available_ports()
-            print(ports)
-            break
-
-        elif key == "q":
-            wind.close()
-            break
         else:
-            break
+            return
+
+
+def _motor_position_menu(wind: Wind):
+    while True:
+        print("\nMotor position options:")
+        print("1. Get motors positions")
+        print("2. Initialize the motor positions")
+        print("3. move the all motor position to zero")
+        print("4. back")
+
+        choice = _prompt_choice("Choose an option: ", {"1", "2", "3", "4"})
+        if choice == "1":
+            positions = {
+                "M0": wind.get_motor_position(0),
+                "M1": wind.get_motor_position(1),
+                "M2": wind.get_motor_position(2),
+                "M3": wind.get_motor_position(3),
+            }
+            print(positions)
+        elif choice == "2":
+            wind.init_position()
+        elif choice == "3":
+            wind.back_to_zero()
+        else:
+            return
+
+
+def main(wind: Wind):
+    while True:
+        print("\nChoose an option:")
+        print("1. wind wires")
+        print("2. adjust motor positions")
+        print("3. close the process")
+
+        choice = _prompt_choice("Choose an option: ", {"1", "2", "3"})
+        if choice == "1":
+            _wind_menu(wind)
+        elif choice == "2":
+            _motor_position_menu(wind)
+        else:
+            return
 
 
 if __name__ == "__main__":
@@ -75,6 +91,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         if not simulation:
             wind.estop()
-            wind.close()
-            print("Keyboard interrupt detected. Exiting...")
-        exit()
+        print("Keyboard interrupt detected. Exiting...")
+    finally:
+        wind.close()
+    exit()

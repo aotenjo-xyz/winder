@@ -145,6 +145,7 @@ def _motor_position_menu(wind: Wind):
                 ("get", "Get motors positions"),
                 ("init", "Initialize the motor positions"),
                 ("zero", "move the all motor position to zero"),
+                ("teeth", "move M1 to specific teeth index (for debugging)"),
                 ("back", "back"),
             ],
         )
@@ -160,6 +161,9 @@ def _motor_position_menu(wind: Wind):
             wind.init_position()
         elif choice == "zero":
             wind.back_to_zero()
+        elif choice == "teeth":
+            teeth_index = int(input("Enter the teeth index: "))
+            wind.move_to_teeth(teeth_index)
         else:
             return
 

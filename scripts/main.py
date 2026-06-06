@@ -1,9 +1,17 @@
 from src.winding import Wind
 from time import sleep
 import sys
-import termios
-import tty
 from typing import Sequence
+
+try:
+    import termios  # type: ignore
+    import tty  # type: ignore
+
+    _ARROW_MENU_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    termios = None  # type: ignore[assignment]
+    tty = None  # type: ignore[assignment]
+    _ARROW_MENU_AVAILABLE = False
 
 
 def _prompt_choice(prompt: str, valid_choices: set[str]) -> str:

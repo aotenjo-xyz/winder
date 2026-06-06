@@ -468,8 +468,15 @@ class Wind:
         self.move_motor(0, self.m1_rotating_position)
         sleep(1.5)
 
+    def get_start_teeth_idx(self, wire_idx: int) -> int:
+        return self.teeth_index_matrix[wire_idx][self.starts_at]
+
+    def is_starting_from_CW(self, wire_idx: int) -> bool:
+        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
+        return is_clockwise(self.winding_config, start_teeth_idx)
+
     def wind(self, wire_idx: int):
-        start_teeth_idx = self.teeth_index_matrix[wire_idx][self.starts_at]
+        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
         self.move_to_teeth(start_teeth_idx)
         sleep(0.5)
 

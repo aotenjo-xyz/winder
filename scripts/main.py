@@ -71,6 +71,33 @@ def _select_option(title: str, options: Sequence[tuple[str, str]]) -> str:
     selected_idx = int(_prompt_choice("Choose an option: ", valid_choices)) - 1
     return options[selected_idx][0]
 
+def _wire_position_confirmation(wind: Wind, wire_idx: int) -> bool:
+    if wind.starts_at != 0:
+        # The start index is not the first tooth, so confirmation is not required.
+        return True
+
+    while True:
+        # If the first tooth is CW, start from the left side; otherwise right side.
+        starting_from_cw = wind.is_starting_from_CW(wire_idx)
+        wire_position = "left" if starting_from_cw else "right"
+        print(
+            f"Please place the wire on the {wire_position} side, then press Enter to continue."
+        )
+        input()
+        choice = _select_option(
+            "Is the wire position correct?",
+            [
+                ("yes", "Yes, continue winding"),
+                ("retry", "No, let me adjust and re-check"),
+                ("cancel", "Cancel and return to previous menu"),
+            ],
+        )
+        if choice == "yes":
+            return True
+        if choice == "retry":
+            continue
+        print("Winding canceled. Returning to previous menu.")
+        return False
 
 def _wind_menu(wind: Wind):
     while True:
@@ -86,17 +113,25 @@ def _wind_menu(wind: Wind):
         )
         if choice == "wire0":
             sleep(0.1)
+            if not _wire_position_confirmation(wind, 0):
+                continue
             wind.wind(0)
             wind.move_motor(0, wind.m0_zero)
         elif choice == "wire1":
             sleep(0.1)
+            if not _wire_position_confirmation(wind, 1):
+                continue
             wind.wind(1)
             wind.move_motor(0, wind.m0_zero)
         elif choice == "wire2":
             sleep(0.1)
+            if not _wire_position_confirmation(wind, 2):
+                continue
             wind.wind(2)
             wind.move_motor(0, wind.m0_zero)
         elif choice == "continuous":
+            if not _wire_position_confirmation(wind, 0):
+                continue
             wind.continuous_winding()
         else:
             return

@@ -471,7 +471,7 @@ class Wind:
     def get_start_teeth_idx(self, wire_idx: int) -> int:
         return self.teeth_index_matrix[wire_idx][self.starts_at]
 
-    def is_starting_from_CW(self, wire_idx: int) -> bool:
+    def is_starting_from_cw(self, wire_idx: int) -> bool:
         start_teeth_idx = self.get_start_teeth_idx(wire_idx)
         return is_clockwise(self.winding_config, start_teeth_idx)
 
@@ -507,7 +507,7 @@ class Wind:
     def wind_wire_around_shaft(self, next_wire_idx: int):
         rotation_count = 2
         motor1_rotation = math.pi * 2 * rotation_count
-        starting_from_cw = self.is_starting_from_CW(next_wire_idx)
+        starting_from_cw = self.is_starting_from_cw(next_wire_idx)
 
         if starting_from_cw:
             self.move_motor(1, self.m1_zero - motor1_rotation)

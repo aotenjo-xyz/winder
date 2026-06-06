@@ -22,8 +22,30 @@ All motors are controlled by Aotenjo Master, a master controller board based on 
 
 code: [Aotenjo Master](https://github.com/aotenjo-xyz/master)
 
-## Power Supply
-Power supply: 18V 1.5A
+## Prerequisites
+
+- [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main): Download and install Miniconda for your operating system.
+
+## Installation
+1. Clone the Winder repository:
+   ```bash
+   git clone https://github.com/aotenjo-xyz/winder.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd winder
+   ```
+3. Create a new conda environment and install the required dependencies:
+   ```bash
+   conda env create -f environment.yml
+   ```
+
+4. Activate the conda environment:
+   ```bash
+   conda activate winding
+   export PYTHONPATH=$PWD
+   ```
+
 
 ## Hardware
 - M0: BE4108 75T gimbal motor (built with this machine)

@@ -27,7 +27,7 @@ scripts/ws.py: This script implements a WebSocket server to stream motor data to
    ```
 3. Create a new conda environment and install the required dependencies:
    ```bash
-   conda env create -f scripts/environment.yml
+   conda env create -f environment.yml
    ```
 
 ## Build

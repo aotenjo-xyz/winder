@@ -510,7 +510,7 @@ class Wind:
         starting_from_cw = self.is_starting_from_CW(next_wire_idx)
 
         if starting_from_cw:
-            self.move_motor(1,self.m1_zero - motor1_rotation)
+            self.move_motor(1, self.m1_zero - motor1_rotation)
             self.m1_zero -= motor1_rotation
         else:
             self.move_motor(1, self.m1_zero + motor1_rotation)

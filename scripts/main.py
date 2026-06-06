@@ -71,6 +71,7 @@ def _select_option(title: str, options: Sequence[tuple[str, str]]) -> str:
     selected_idx = int(_prompt_choice("Choose an option: ", valid_choices)) - 1
     return options[selected_idx][0]
 
+
 def _wire_position_confirmation(wind: Wind, wire_idx: int) -> bool:
     if wind.starts_at != 0:
         # The start index is not the first tooth, so confirmation is not required.
@@ -98,6 +99,7 @@ def _wire_position_confirmation(wind: Wind, wire_idx: int) -> bool:
             continue
         print("Winding canceled. Returning to previous menu.")
         return False
+
 
 def _wind_menu(wind: Wind):
     while True:

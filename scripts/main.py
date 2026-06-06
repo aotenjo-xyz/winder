@@ -68,7 +68,7 @@ def _select_option(title: str, options: Sequence[tuple[str, str]]) -> str:
     Arrow-key menu in interactive terminals.
     Fallback to numeric input for piped/non-interactive environments.
     """
-    if sys.stdin.isatty() and sys.stdout.isatty():
+    if _ARROW_MENU_AVAILABLE and sys.stdin.isatty() and sys.stdout.isatty():
         return _arrow_select_option(title, options)
 
     print(f"\n{title}")

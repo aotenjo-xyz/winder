@@ -1,6 +1,7 @@
 # winder
+[![Docs](https://img.shields.io/badge/Docs-aotenjo.xyz-blue?style=flat-square)](https://aotenjo.xyz/docs/winder/overview) | [![YouTube](https://img.shields.io/badge/YouTube-red?style=flat-square&logo=youtube)](https://www.youtube.com/@yuchi0.1) | [![TikTok](https://img.shields.io/badge/TikTok-black?style=flat-square&logo=tiktok)](https://www.tiktok.com/@yuchi0.1) | [![Instagram](https://img.shields.io/badge/Instagram-E1306C?style=flat-square&logo=instagram)](https://www.instagram.com/aotenjo.xyz) | [![X](https://img.shields.io/badge/X-000000?style=flat-square&logo=x)](https://x.com/aotenjo_xyz)
 
-[![BLDC motor winding machine](http://img.youtube.com/vi/486nUU2FjGU/0.jpg)](http://www.youtube.com/watch?v=486nUU2FjGU "BLDC Motor Winding Machine")
+[![BLDC motor winding machine](http://img.youtube.com/vi/-ggH2UGuAuA/0.jpg)](http://www.youtube.com/watch?v=-ggH2UGuAuA "BLDC Motor Winding Machine")
 
 Winding the wire for a BLDC motor is a time-consuming and labor-intensive process. This winding machine automates this tedious tasks.
 

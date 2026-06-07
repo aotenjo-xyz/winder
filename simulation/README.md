@@ -95,7 +95,25 @@ make export-simulation
 
 ## Quickstart (built binary)
 
-After building, launch everything with a single command:
+After building, run the interactive controller and simulation as separate processes.
+
+Terminal 1 (interactive controller):
+
+```bash
+conda activate winding
+export PYTHONPATH=$PWD
+python scripts/main.py -s
+```
+
+Terminal 2 (WebSocket bridge):
+
+```bash
+conda activate winding
+export PYTHONPATH=$PWD
+python scripts/ws.py
+```
+
+Terminal 3 (simulation window):
 
 ```bash
 conda activate winding
@@ -103,7 +121,7 @@ export PYTHONPATH=$PWD
 make simulate
 ```
 
-This starts `main.py` in simulation mode, the WebSocket server, and the simulation window together. Enter `g` in the terminal to begin winding. Closing the simulation window stops all processes automatically.
+`make simulate` launches the exported simulation binary only. Use the terminal running `main.py` to select `wind wires` and continue through the interactive prompts.
 
 ## Quickstart (Godot editor)
 
@@ -129,4 +147,4 @@ This starts `main.py` in simulation mode, the WebSocket server, and the simulati
 5. Run the simulation:
    - In Godot, click on the "Play" button (triangle icon) at the top right corner to start the simulation.
    - You should see the winding machine simulation in action.
-6. Enter `g` in the terminal running `main.py` to start the winding process in the simulation.
+6. Select `wind wires` and follow the prompts in the terminal to start the winding process in the simulation.

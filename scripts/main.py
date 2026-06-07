@@ -87,7 +87,7 @@ def _wire_position_confirmation(wind: Wind, wire_idx: int) -> bool:
 
     while True:
         # If the first tooth is CW, start from the left side; otherwise right side.
-        starting_from_cw = wind.is_starting_from_CW(wire_idx)
+        starting_from_cw = wind.is_starting_from_cw(wire_idx)
         wire_position = "left" if starting_from_cw else "right"
         print(
             f"Please place the wire on the {wire_position} side, then press Enter to continue."

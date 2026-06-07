@@ -505,6 +505,7 @@ class Wind:
         self.logger.info(f"Winding wire {wire_idx} done")
 
     def wind_wire_around_shaft(self, next_wire_idx: int):
+        self.starts_at = 0
         rotation_count = 2
         motor1_rotation = math.pi * 2 * rotation_count
         starting_from_cw = self.is_starting_from_cw(next_wire_idx)
@@ -542,7 +543,6 @@ class Wind:
 
         self.wind(0)
         self.wind_wire_around_shaft(1)
-        self.starts_at = 0
         self.wind(1)
         self.wind_wire_around_shaft(2)
         self.wind(2)

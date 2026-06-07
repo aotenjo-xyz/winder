@@ -468,8 +468,15 @@ class Wind:
         self.move_motor(0, self.m1_rotating_position)
         sleep(1.5)
 
+    def get_start_teeth_idx(self, wire_idx: int) -> int:
+        return self.teeth_index_matrix[wire_idx][self.starts_at]
+
+    def is_starting_from_cw(self, wire_idx: int) -> bool:
+        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
+        return is_clockwise(self.winding_config, start_teeth_idx)
+
     def wind(self, wire_idx: int):
-        start_teeth_idx = self.teeth_index_matrix[wire_idx][self.starts_at]
+        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
         self.move_to_teeth(start_teeth_idx)
         sleep(0.5)
 
@@ -497,22 +504,19 @@ class Wind:
 
         self.logger.info(f"Winding wire {wire_idx} done")
 
-    def wind_wire_around_shaft(self, wire_idx: int):
-        # Move M1
-        # start_teeth_idx = self.teeth_index_matrix[wire_idx + 1][0]
-        # self.move_to_teeth(start_teeth_idx)
-        # sleep(0.5)
-
-        motor1_pos = self.get_motor_position(1)
-
-        # 2 full rotation of M1
+    def wind_wire_around_shaft(self, next_wire_idx: int):
+        self.starts_at = 0
         rotation_count = 2
         motor1_rotation = math.pi * 2 * rotation_count
-        if wire_idx == 0:
-            motor1_rotation = -motor1_rotation
+        starting_from_cw = self.is_starting_from_cw(next_wire_idx)
 
-        self.move_motor(1, motor1_pos + motor1_rotation)
-        self.m1_zero += motor1_rotation
+        if starting_from_cw:
+            self.move_motor(1, self.m1_zero - motor1_rotation)
+            self.m1_zero -= motor1_rotation
+        else:
+            self.move_motor(1, self.m1_zero + motor1_rotation)
+            self.m1_zero += motor1_rotation + math.pi * 2
+
         sleep(1.5)
 
         if self.motor2_pos == Motor2State.TOP_LEFT:
@@ -538,10 +542,9 @@ class Wind:
         self.init_position(True)
 
         self.wind(0)
-        self.wind_wire_around_shaft(0)
-        self.starts_at = 0
-        self.wind(1)
         self.wind_wire_around_shaft(1)
+        self.wind(1)
+        self.wind_wire_around_shaft(2)
         self.wind(2)
 
     def close(self):

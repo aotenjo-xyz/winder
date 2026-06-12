@@ -1,4 +1,5 @@
 import serial
+import time
 from time import sleep
 import math
 from .config import rotating_directions, m2_gear_ratio
@@ -64,7 +65,7 @@ class Wind:
                 update_motor_position(self.conn, i, 0.0)
                 update_motor_target(self.conn, i, 0.0)
 
-        self.logger = init_logger()
+        self.logger = init_logger(self.config)
 
         self.turns = turns if turns is not None else self.config["winding"]["turns"]
         self.winding_config = self.config["winding"]["winding_config"]
@@ -476,33 +477,41 @@ class Wind:
         return is_clockwise(self.winding_config, start_teeth_idx)
 
     def wind(self, wire_idx: int):
-        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
-        self.move_to_teeth(start_teeth_idx)
-        sleep(0.5)
+        self.logger.info(f"Start winding wire {wire_idx}")
+        start_time = time.perf_counter()
+        try:
+            start_teeth_idx = self.get_start_teeth_idx(wire_idx)
+            self.move_to_teeth(start_teeth_idx)
+            sleep(0.5)
 
-        if is_starting_from_bottom(
-            self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
-        ):
-            # starting from the bottom
-            self.move_motor(2, self.m2_zero + math.pi)
-            if not self.simulation:
-                sleep(15)
+            if is_starting_from_bottom(
+                self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
+            ):
+                # starting from the bottom
+                self.move_motor(2, self.m2_zero + math.pi)
+                if not self.simulation:
+                    sleep(15)
 
-        for i in range(self.starts_at, self.num_of_tooth_to_wind):
-            teeth_idx = self.teeth_index_matrix[wire_idx][i]
-            clockwise = is_clockwise(self.winding_config, teeth_idx)
-            if self.starts_at == i and i != 0:
-                self.prevent_collision(clockwise)
-                sleep(0.3)
+            for i in range(self.starts_at, self.num_of_tooth_to_wind):
+                teeth_idx = self.teeth_index_matrix[wire_idx][i]
+                clockwise = is_clockwise(self.winding_config, teeth_idx)
+                if self.starts_at == i and i != 0:
+                    self.prevent_collision(clockwise)
+                    sleep(0.3)
 
-                self.move_motor(0, self.m1_rotating_position)
+                    self.move_motor(0, self.m1_rotating_position)
 
-            if is_skipping(self.winding_config, teeth_idx) and not clockwise:
-                self.move_wire_to_right_position(teeth_idx)
+                if is_skipping(self.winding_config, teeth_idx) and not clockwise:
+                    self.move_wire_to_right_position(teeth_idx)
 
-            self.wind_wire(teeth_idx, clockwise, i)
+                self.wind_wire(teeth_idx, clockwise, i)
 
-        self.logger.info(f"Winding wire {wire_idx} done")
+            self.logger.info(f"Winding wire {wire_idx} done")
+        finally:
+            elapsed_seconds = time.perf_counter() - start_time
+            self.logger.info(
+                f"Wire {wire_idx} winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
+            )
 
     def wind_wire_around_shaft(self, next_wire_idx: int):
         self.starts_at = 0
@@ -539,13 +548,21 @@ class Wind:
         self.m2_zero = motor2_pos
 
     def continuous_winding(self):
-        self.init_position(True)
+        self.logger.info("Starting continuous winding")
+        start_time = time.perf_counter()
+        try:
+            self.init_position(True)
 
-        self.wind(0)
-        self.wind_wire_around_shaft(1)
-        self.wind(1)
-        self.wind_wire_around_shaft(2)
-        self.wind(2)
+            self.wind(0)
+            self.wind_wire_around_shaft(1)
+            self.wind(1)
+            self.wind_wire_around_shaft(2)
+            self.wind(2)
+        finally:
+            elapsed_seconds = time.perf_counter() - start_time
+            self.logger.info(
+                f"Continuous winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
+            )
 
     def close(self):
         if not self.simulation:

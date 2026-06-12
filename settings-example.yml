@@ -5,6 +5,9 @@ serial:
   port: "/dev/ttyACM0"
   baudrate: 115200
 
+logging:
+  level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
 motor:
   M0: 
     wind_range_end: -14.0

@@ -64,7 +64,7 @@ class Wind:
                 update_motor_position(self.conn, i, 0.0)
                 update_motor_target(self.conn, i, 0.0)
 
-        self.logger = init_logger()
+        self.logger = init_logger(self.config)
 
         self.turns = turns if turns is not None else self.config["winding"]["turns"]
         self.winding_config = self.config["winding"]["winding_config"]

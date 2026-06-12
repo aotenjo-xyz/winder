@@ -23,30 +23,35 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 
-def init_logger():
+def init_logger(config=None):
     logger = logging.getLogger("Wind")
-    debug_level = os.environ.get("DEBUG", "3")
+    logging_level_name = None
 
-    # Define the logging level based on the debug level
-    if debug_level == "3":
-        logging_level = logging.DEBUG
-    elif debug_level == "2":
-        logging_level = logging.INFO
-    elif debug_level == "1":
-        logging_level = logging.WARNING
-    else:
-        logging_level = logging.ERROR
+    if isinstance(config, dict):
+        logging_cfg = config.get("logging", {})
+        if isinstance(logging_cfg, dict):
+            logging_level_name = logging_cfg.get("level")
 
-    handler = logging.StreamHandler()
-    formatter = ColorFormatter("%(asctime)s - %(name)s - %(levelname)s	%(message)s")
-    handler.setFormatter(formatter)
+    # Environment variable overrides config to make temporary runtime changes easy.
+    env_log_level = os.environ.get("WINDER_LOG_LEVEL")
+    if env_log_level:
+        logging_level_name = env_log_level
+    if logging_level_name is None:
+        # Default logging level if not specified in config or environment variable
+        logging_level_name = "INFO"
 
-    # Configure the logging
-    logging.basicConfig(
-        level=logging_level,
-        # format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[handler],
-    )
+    logging_level = getattr(logging, str(logging_level_name).upper(), logging.INFO)
+
+    logger.setLevel(logging_level)
+    logger.propagate = False
+
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = ColorFormatter(
+            "%(asctime)s - %(name)s - %(levelname)s\t%(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
     return logger
 

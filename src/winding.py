@@ -2,7 +2,7 @@ import serial
 import time
 from time import sleep
 import math
-from .config import rotating_directions, m2_gear_ratio
+from .constants import m2_gear_ratio
 from .utils import (
     init_logger,
     load_config,
@@ -91,6 +91,13 @@ class Wind:
             "angle_to_prevent_collision"
         ]
 
+        self.rotating_directions = [
+            self.config["motor"]["M0"]["direction"],
+            self.config["motor"]["M1"]["direction"],
+            self.config["motor"]["M2"]["direction"],
+            self.config["motor"]["M3"]["direction"],
+        ]
+
         if self.config["winding"]["dont_move_m3"]:
             self.m3_wind_torque = 0
             self.m3_slow_wind_torque = 0
@@ -118,7 +125,7 @@ class Wind:
         )
 
     def check_motor_direction(self, motor_id, target):
-        rotating_direction = rotating_directions[motor_id]
+        rotating_direction = self.rotating_directions[motor_id]
         if not rotating_direction:
             return -target
         return target

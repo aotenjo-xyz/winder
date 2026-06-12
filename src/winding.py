@@ -539,13 +539,21 @@ class Wind:
         self.m2_zero = motor2_pos
 
     def continuous_winding(self):
-        self.init_position(True)
+        self.logger.info("Starting continuous winding")
+        start_time = datetime.now()
+        try:
+            self.init_position(True)
 
-        self.wind(0)
-        self.wind_wire_around_shaft(1)
-        self.wind(1)
-        self.wind_wire_around_shaft(2)
-        self.wind(2)
+            self.wind(0)
+            self.wind_wire_around_shaft(1)
+            self.wind(1)
+            self.wind_wire_around_shaft(2)
+            self.wind(2)
+        finally:
+            elapsed_seconds = (datetime.now() - start_time).total_seconds()
+            self.logger.info(
+                f"Continuous winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
+            )
 
     def close(self):
         if not self.simulation:

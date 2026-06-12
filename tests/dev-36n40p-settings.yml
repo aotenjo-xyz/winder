@@ -6,8 +6,7 @@ serial:
   baudrate: 115200
 
 logging:
-  level: "DEBUG"
-
+  level: "INFO"
 motor:
   M0: 
     direction: false

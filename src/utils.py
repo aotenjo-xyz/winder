@@ -40,8 +40,13 @@ def init_logger(config=None):
         # Default logging level if not specified in config or environment variable
         logging_level_name = "INFO"
 
-    logging_level = getattr(logging, str(logging_level_name).upper(), logging.INFO)
-
+    level_name = str(logging_level_name).strip().upper()
+    if level_name.isdigit():
+        logging_level = int(level_name)
+    else:
+        logging_level = getattr(logging, level_name, None)
+    if not isinstance(logging_level, int):
+        raise ValueError(f"Invalid logging level: {logging_level_name!r}")
     logger.setLevel(logging_level)
     logger.propagate = False
 

@@ -1,4 +1,5 @@
 import serial
+import time
 from time import sleep
 import math
 from .config import rotating_directions, m2_gear_ratio
@@ -477,7 +478,7 @@ class Wind:
 
     def wind(self, wire_idx: int):
         self.logger.info(f"Start winding wire {wire_idx}")
-        start_time = datetime.now()
+        start_time = time.perf_counter()
         try:
             start_teeth_idx = self.get_start_teeth_idx(wire_idx)
             self.move_to_teeth(start_teeth_idx)
@@ -507,7 +508,7 @@ class Wind:
 
             self.logger.info(f"Winding wire {wire_idx} done")
         finally:
-            elapsed_seconds = (datetime.now() - start_time).total_seconds()
+            elapsed_seconds = time.perf_counter() - start_time
             self.logger.info(
                 f"Wire {wire_idx} winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
             )

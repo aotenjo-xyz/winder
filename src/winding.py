@@ -476,33 +476,41 @@ class Wind:
         return is_clockwise(self.winding_config, start_teeth_idx)
 
     def wind(self, wire_idx: int):
-        start_teeth_idx = self.get_start_teeth_idx(wire_idx)
-        self.move_to_teeth(start_teeth_idx)
-        sleep(0.5)
+        self.logger.info(f"Start winding wire {wire_idx}")
+        start_time = datetime.now()
+        try:
+            start_teeth_idx = self.get_start_teeth_idx(wire_idx)
+            self.move_to_teeth(start_teeth_idx)
+            sleep(0.5)
 
-        if is_starting_from_bottom(
-            self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
-        ):
-            # starting from the bottom
-            self.move_motor(2, self.m2_zero + math.pi)
-            if not self.simulation:
-                sleep(15)
+            if is_starting_from_bottom(
+                self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
+            ):
+                # starting from the bottom
+                self.move_motor(2, self.m2_zero + math.pi)
+                if not self.simulation:
+                    sleep(15)
 
-        for i in range(self.starts_at, self.num_of_tooth_to_wind):
-            teeth_idx = self.teeth_index_matrix[wire_idx][i]
-            clockwise = is_clockwise(self.winding_config, teeth_idx)
-            if self.starts_at == i and i != 0:
-                self.prevent_collision(clockwise)
-                sleep(0.3)
+            for i in range(self.starts_at, self.num_of_tooth_to_wind):
+                teeth_idx = self.teeth_index_matrix[wire_idx][i]
+                clockwise = is_clockwise(self.winding_config, teeth_idx)
+                if self.starts_at == i and i != 0:
+                    self.prevent_collision(clockwise)
+                    sleep(0.3)
 
-                self.move_motor(0, self.m1_rotating_position)
+                    self.move_motor(0, self.m1_rotating_position)
 
-            if is_skipping(self.winding_config, teeth_idx) and not clockwise:
-                self.move_wire_to_right_position(teeth_idx)
+                if is_skipping(self.winding_config, teeth_idx) and not clockwise:
+                    self.move_wire_to_right_position(teeth_idx)
 
-            self.wind_wire(teeth_idx, clockwise, i)
+                self.wind_wire(teeth_idx, clockwise, i)
 
-        self.logger.info(f"Winding wire {wire_idx} done")
+            self.logger.info(f"Winding wire {wire_idx} done")
+        finally:
+            elapsed_seconds = (datetime.now() - start_time).total_seconds()
+            self.logger.info(
+                f"Wire {wire_idx} winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
+            )
 
     def wind_wire_around_shaft(self, next_wire_idx: int):
         self.starts_at = 0

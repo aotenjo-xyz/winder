@@ -47,9 +47,9 @@ code: [Aotenjo Master](https://github.com/aotenjo-xyz/master)
    export PYTHONPATH=$PWD
    ```
 
-5. Create a `settings.yml` file based on `settings_example.yml` and update the settings as needed.
+5. Create a `settings.yml` file based on `settings-example.yml` and update the settings as needed.
    ```bash
-   cp settings_example.yml settings.yml
+   cp settings-example.yml settings.yml
    ```
 
 

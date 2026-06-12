@@ -549,7 +549,7 @@ class Wind:
 
     def continuous_winding(self):
         self.logger.info("Starting continuous winding")
-        start_time = datetime.now()
+        start_time = time.perf_counter()
         try:
             self.init_position(True)
 
@@ -559,7 +559,7 @@ class Wind:
             self.wind_wire_around_shaft(2)
             self.wind(2)
         finally:
-            elapsed_seconds = (datetime.now() - start_time).total_seconds()
+            elapsed_seconds = time.perf_counter() - start_time
             self.logger.info(
                 f"Continuous winding process time: {elapsed_seconds:.2f}s ({elapsed_seconds / 60:.2f}min)"
             )

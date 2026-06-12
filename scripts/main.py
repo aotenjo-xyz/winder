@@ -152,8 +152,8 @@ def _motor_position_menu(wind: Wind):
         choice = _select_option(
             "Motor position options",
             [
-                ("get", "Get motors positions"),
                 ("init", "Initialize the motor positions"),
+                ("get", "Get motors positions"),
                 ("zero", "move the all motor position to zero"),
                 ("teeth", "move M1 to specific teeth index (for debugging)"),
                 ("back", "back"),

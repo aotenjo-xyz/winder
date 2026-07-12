@@ -1,4 +1,4 @@
-.PHONY: format lint check create-env update-env export-simulation export-simulation-linux export-simulation-windows export-simulation-macos simulate
+.PHONY: format lint check create-env update-env uv-sync uv-lock export-simulation export-simulation-linux export-simulation-windows export-simulation-macos simulate
 
 # Optional per-user overrides, e.g. GODOT=/absolute/path/to/Godot
 -include .make.local
@@ -23,6 +23,15 @@ create-env:
 
 update-env:
 	conda env update -f scripts/environment.yml --name winding
+
+# uv-based environment (alternative to conda). Creates/updates .venv from
+# pyproject.toml + uv.lock.
+uv-sync:
+	uv sync
+
+# Refresh uv.lock after changing dependencies in pyproject.toml.
+uv-lock:
+	uv lock
 
 export-simulation:
 	mkdir -p simulation/bin

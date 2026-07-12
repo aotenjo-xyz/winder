@@ -25,33 +25,11 @@ code: [Aotenjo Master](https://github.com/aotenjo-xyz/master)
 
 ## Installation
 
-You can set up the environment with either [uv](https://docs.astral.sh/uv/)
-(recommended) or conda. Both install the same pinned dependency versions.
+You can set up the environment with either conda or
+[uv](https://docs.astral.sh/uv/). Both install the same pinned dependency
+versions.
 
-### Option A — uv (recommended)
-
-Prerequisite: [install uv](https://docs.astral.sh/uv/getting-started/installation/).
-
-1. Clone the Winder repository and enter it:
-   ```bash
-   git clone https://github.com/aotenjo-xyz/winder.git
-   cd winder
-   ```
-2. Create the virtual environment and install all dependencies (uv installs
-   Python 3.12 automatically if needed):
-   ```bash
-   uv sync
-   ```
-3. Create a `settings.yml` file based on `settings-example.yml` and update the
-   settings as needed:
-   ```bash
-   cp settings-example.yml settings.yml
-   ```
-
-That's it — no need to set `PYTHONPATH`. Run any command inside the environment
-with `uv run`, e.g. `uv run python scripts/main.py -s` or `uv run pytest`.
-
-### Option B — conda
+### Option A — conda
 
 Prerequisite: [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main).
 
@@ -74,6 +52,29 @@ Prerequisite: [Miniconda](https://www.anaconda.com/docs/getting-started/minicond
    ```bash
    cp settings-example.yml settings.yml
    ```
+
+### Option B — uv
+
+Prerequisite: [install uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+1. Clone the Winder repository and enter it:
+   ```bash
+   git clone https://github.com/aotenjo-xyz/winder.git
+   cd winder
+   ```
+2. Create the virtual environment and install all dependencies (uv installs
+   Python 3.12 automatically if needed):
+   ```bash
+   uv sync
+   ```
+3. Create a `settings.yml` file based on `settings-example.yml` and update the
+   settings as needed:
+   ```bash
+   cp settings-example.yml settings.yml
+   ```
+
+That's it — no need to set `PYTHONPATH`. Run any command inside the environment
+with `uv run`, e.g. `uv run python scripts/main.py -s` or `uv run pytest`.
 
 
 ## Hardware

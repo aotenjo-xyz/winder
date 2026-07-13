@@ -23,34 +23,58 @@ All motors are controlled by Aotenjo Master, a master controller board based on 
 
 code: [Aotenjo Master](https://github.com/aotenjo-xyz/master)
 
-## Prerequisites
-
-- [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main): Download and install Miniconda for your operating system.
-
 ## Installation
-1. Clone the Winder repository:
+
+You can set up the environment with either conda or
+[uv](https://docs.astral.sh/uv/). Both install the same pinned dependency
+versions.
+
+### Option A — conda
+
+Prerequisite: [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main).
+
+1. Clone the Winder repository and enter it:
    ```bash
    git clone https://github.com/aotenjo-xyz/winder.git
-   ```
-2. Navigate to the project directory:
-   ```bash
    cd winder
    ```
-3. Create a new conda environment and install the required dependencies:
+2. Create a new conda environment and install the required dependencies:
    ```bash
    conda env create -f environment.yml
    ```
-
-4. Activate the conda environment:
+3. Activate the conda environment:
    ```bash
    conda activate winding
    export PYTHONPATH=$PWD
    ```
-
-5. Create a `settings.yml` file based on `settings-example.yml` and update the settings as needed.
+4. Create a `settings.yml` file based on `settings-example.yml` and update the
+   settings as needed:
    ```bash
    cp settings-example.yml settings.yml
    ```
+
+### Option B — uv
+
+Prerequisite: [install uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+1. Clone the Winder repository and enter it:
+   ```bash
+   git clone https://github.com/aotenjo-xyz/winder.git
+   cd winder
+   ```
+2. Create the virtual environment and install all dependencies (uv installs
+   Python 3.12 automatically if needed):
+   ```bash
+   uv sync
+   ```
+3. Create a `settings.yml` file based on `settings-example.yml` and update the
+   settings as needed:
+   ```bash
+   cp settings-example.yml settings.yml
+   ```
+
+That's it — no need to set `PYTHONPATH`. Run any command inside the environment
+with `uv run`, e.g. `uv run python scripts/main.py -s` or `uv run pytest`.
 
 
 ## Hardware

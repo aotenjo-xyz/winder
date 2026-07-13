@@ -1,0 +1,36 @@
+[project]
+name = "winder"
+version = "0.1.0"
+description = "Control software for the Aotenjo BLDC motor winding machine"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dependencies = [
+    "pydantic==2.11.7",
+    "pyserial==3.5",
+    "pyyaml==6.0.2",
+    "websockets==15.0.1",
+]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+# The runtime code lives in the top-level `src` import package, which is
+# referenced throughout the codebase as `from src... import ...`. Installing it
+# (editable, via `uv sync`) makes those imports resolve without needing to set
+# PYTHONPATH manually.
+[tool.setuptools]
+packages = ["src"]
+
+# Dev tooling (black/ruff/pytest). `uv sync` installs the `dev` group by
+# default, giving a ready-to-work environment.
+[dependency-groups]
+dev = [
+    "black==25.1.0",
+    "pytest==8.4.2",
+    "ruff==0.13.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

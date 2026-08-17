@@ -45,18 +45,18 @@ class Wind:
         self.config = load_config(config_path)
         self.simulation = simulation
         self.motor_velocities = [
-            self.config["motor"]["M0"]["velocity"],
-            self.config["motor"]["M1"]["velocity"],
-            self.config["motor"]["M2"]["velocity"],
-            self.config["motor"]["M3"]["velocity"],
+            self.config.motor.M0.velocity,
+            self.config.motor.M1.velocity,
+            self.config.motor.M2.velocity,
+            self.config.motor.M3.velocity,
         ]
         self.motor_positions_in_simulation = [
             MotorPosition(motor_id=i, position=0.0, timestamp=datetime.now())
             for i in range(4)
         ]
         if not simulation:
-            baudrate = self.config["serial"]["baudrate"]
-            port = self.config["serial"]["port"]
+            baudrate = self.config.serial.baudrate
+            port = self.config.serial.port
             self.ser = serial.Serial(port, baudrate)
         else:
             self.conn = init_db()
@@ -67,45 +67,43 @@ class Wind:
 
         self.logger = init_logger(self.config)
 
-        self.turns = turns if turns is not None else self.config["winding"]["turns"]
-        self.winding_config = self.config["winding"]["winding_config"]
+        self.turns = turns if turns is not None else self.config.winding.turns
+        self.winding_config = self.config.winding.winding_config
         self.teeth_count = len(self.winding_config)
         self.num_of_tooth_to_wind = get_num_of_tooth_to_wind(self.winding_config)
         self.teeth_index_matrix = get_winding_teeth_indices(self.winding_config)
 
         self.m0_wind_range = (
-            self.config["motor"]["M0"]["wind_range_start"],
-            self.config["motor"]["M0"]["wind_range_end"],
+            self.config.motor.M0.wind_range_start,
+            self.config.motor.M0.wind_range_end,
         )
-        self.m0_zero = self.config["motor"]["M0"]["end_to_zero"] + self.m0_wind_range[1]
-        self.m1_zero = self.config["motor"]["M1"]["zero"]
-        self.m2_zero = self.config["motor"]["M2"]["zero"]
+        self.m0_zero = self.config.motor.M0.end_to_zero + self.m0_wind_range[1]
+        self.m1_zero = self.config.motor.M1.zero
+        self.m2_zero = self.config.motor.M2.zero
 
-        self.starts_at = self.config["winding"]["starts_at"]
+        self.starts_at = self.config.winding.starts_at
 
         self.m1_rotating_position = (
-            self.config["motor"]["M1"]["end_to_rotating_position"]
+            self.config.motor.M1.end_to_rotating_position
             + self.m0_wind_range[1]
         )
-        self.m2_angle_to_prevent_collision = self.config["motor"]["M2"][
-            "angle_to_prevent_collision"
-        ]
+        self.m2_angle_to_prevent_collision = self.config.motor.M2.angle_to_prevent_collision
 
         self.rotating_directions = [
-            self.config["motor"]["M0"]["direction"],
-            self.config["motor"]["M1"]["direction"],
-            self.config["motor"]["M2"]["direction"],
-            self.config["motor"]["M3"]["direction"],
+            self.config.motor.M0.direction,
+            self.config.motor.M1.direction,
+            self.config.motor.M2.direction,
+            self.config.motor.M3.direction,
         ]
 
-        if self.config["winding"]["dont_move_m3"]:
+        if self.config.winding.dont_move_m3:
             self.m3_wind_torque = 0
             self.m3_slow_wind_torque = 0
             self.m3_pull_wire_torque = 0
         else:
-            self.m3_wind_torque = self.config["motor"]["M3"]["wind_torque"]
+            self.m3_wind_torque = self.config.motor.M3.wind_torque
             self.m3_slow_wind_torque = 0.03
-            self.m3_pull_wire_torque = self.config["motor"]["M3"]["pull_wire_torque"]
+            self.m3_pull_wire_torque = self.config.motor.M3.pull_wire_torque
 
     def calculate_motor_position_in_simulation(self, motor_id, timestamp=None):
         target_position = self.motor_positions[motor_id]

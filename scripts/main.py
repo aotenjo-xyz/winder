@@ -154,6 +154,7 @@ def _motor_position_menu(wind: Wind):
             [
                 ("init", "Initialize the motor positions"),
                 ("get", "Get motors positions"),
+                ("pid", "Get motors PID parameters"),
                 ("zero", "move the all motor position to zero"),
                 ("teeth", "move M1 to specific teeth index (for debugging)"),
                 ("back", "back"),
@@ -169,6 +170,10 @@ def _motor_position_menu(wind: Wind):
             print(positions)
         elif choice == "init":
             wind.init_position()
+        elif choice == "pid":
+            print("M0:", wind.get_motor_pid_parameters(0))
+            print("M1:", wind.get_motor_pid_parameters(1))
+            print("M2:", wind.get_motor_pid_parameters(2))
         elif choice == "zero":
             wind.back_to_zero()
         elif choice == "teeth":

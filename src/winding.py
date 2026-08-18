@@ -236,18 +236,17 @@ class Wind:
         ports = serial.tools.list_ports.comports()
         return [port.device for port in ports]
 
-    def get_motor_position(self, motor_id):
+    def send_serial_command(self, command, retries=3):
+        """
+        Send a command to the serial port and return the response
+        """
         if self.simulation:
-            motor_position_in_simulation = self.calculate_motor_position_in_simulation(
-                motor_id
-            )
-            update_motor_position(self.conn, motor_id, motor_position_in_simulation)
-            return motor_position_in_simulation
-        # Run M<motor_id>P to get the current position of the motor
-        retries = 3
+            self.logger.debug(f"Simulation mode: {command.strip()}")
+            return "Simulation mode"
+
         while retries > 0:
             try:
-                self.ser.write(bytes(f"M{motor_id}P\n", "utf-8"))
+                self.ser.write(bytes(command + "\n", "utf-8"))
                 break
             except serial.SerialException:
                 retries -= 1
@@ -257,6 +256,16 @@ class Wind:
             raise serial.SerialException(
                 "Failed to write to serial port after 3 retries"
             )
+
+    def get_motor_position(self, motor_id):
+        if self.simulation:
+            motor_position_in_simulation = self.calculate_motor_position_in_simulation(
+                motor_id
+            )
+            update_motor_position(self.conn, motor_id, motor_position_in_simulation)
+            return motor_position_in_simulation
+        # Run M<motor_id>P to get the current position of the motor
+        self.send_serial_command(f"M{motor_id}P")
 
         # Read the response
         # Response format: M<motor_id>P<position>
@@ -395,6 +404,58 @@ class Wind:
                 2, self.motor_positions[2] - self.m2_angle_to_prevent_collision
             )
             self.motor2_pos = Motor2State.BOTTOM_RIGHT
+
+    def _get_motor_config(self, motor_id):
+        return getattr(self.config.motor, f"M{motor_id}")
+
+    def set_pid_parameters(self, motor_id):
+        motor_config = self._get_motor_config(motor_id)
+        vP = motor_config.vP
+        vI = motor_config.vI
+        vD = motor_config.vD
+        pP = motor_config.pP
+        voltage_limit = motor_config.voltage_limit
+        velocirty_limit = motor_config.velocirty_limit
+        lpfTf = motor_config.lpfTf
+        # M<motor_id>S<vP>,<vI>,<vD>,<pP>,<voltageLimit>,<velocityLimit>,<lpfTf>
+        command = f"M{motor_id}S{vP},{vI},{vD},{pP},{voltage_limit},{velocirty_limit},{lpfTf}\n"
+        if self.simulation:
+            self.logger.debug(f"Simulation mode: {command.strip()}")
+        else:
+            self.ser.write(bytes(command, "utf-8"))
+            self.logger.debug(command.strip())
+
+    def get_motor_pid_parameters(self, motor_id):
+        if self.simulation:
+            motor_config = self._get_motor_config(motor_id)
+            return {
+                "vP": motor_config.vP,
+                "vI": motor_config.vI,
+                "vD": motor_config.vD,
+                "pP": motor_config.pP,
+                "voltage_limit": motor_config.voltage_limit,
+                "velocirty_limit": motor_config.velocirty_limit,
+                "lpfTf": motor_config.lpfTf,
+            }
+        else:
+            self.send_serial_command(f"M{motor_id}I")
+
+            # Response format: M<motor_id>I<vP>,<vI>,<vD>,<pP>,<voltageLimit>,<velocityLimit>,<lpfTf>
+            while True:
+                if self.ser.in_waiting:
+                    line = self.ser.readline().decode("utf-8").rstrip()
+                    if len(line) > 2 and line[:3] == f"M{motor_id}I":
+                        break
+            params = line.split("I")[1].split(",")
+            return {
+                "vP": float(params[0]),
+                "vI": float(params[1]),
+                "vD": float(params[2]),
+                "pP": float(params[3]),
+                "voltage_limit": float(params[4]),
+                "velocirty_limit": float(params[5]),
+                "lpfTf": float(params[6]),
+            }
 
     def prevent_collision(self, clockwise):
         if self.is_motor2_at_12oclock() and not clockwise:

@@ -84,10 +84,11 @@ class Wind:
         self.starts_at = self.config.winding.starts_at
 
         self.m1_rotating_position = (
-            self.config.motor.M1.end_to_rotating_position
-            + self.m0_wind_range[1]
+            self.config.motor.M1.end_to_rotating_position + self.m0_wind_range[1]
         )
-        self.m2_angle_to_prevent_collision = self.config.motor.M2.angle_to_prevent_collision
+        self.m2_angle_to_prevent_collision = (
+            self.config.motor.M2.angle_to_prevent_collision
+        )
 
         self.rotating_directions = [
             self.config.motor.M0.direction,
@@ -134,6 +135,9 @@ class Wind:
         return target * gear_ratio
 
     def move_motor(self, motor_id, target, round_to=3):
+        """
+        Move the motor to the target position without waiting for it to reach the target position
+        """
         motor_target = self.check_motor_direction(motor_id, target)
         if motor_id == 2:
             motor_target = self.adjust_motor_position_from_gear_ratio(
@@ -165,15 +169,37 @@ class Wind:
 
         self.motor_positions[motor_id] = target
 
+    def move_motor_and_wait(
+        self,
+        motor_id,
+        target,
+        tolerance=0.01,
+        timeout=5.0,
+    ):
+        """
+        Move the motor to the target position and wait until it reaches the target within the specified tolerance
+        """
+        self.move_motor(motor_id, target)
+
+        start = time.monotonic()
+        while time.monotonic() - start < timeout:
+            current_position = self.get_motor_position(motor_id)
+            if abs(current_position - target) <= tolerance:
+                break
+            sleep(0.1)
+        else:
+            raise TimeoutError(
+                f"Motor {motor_id} did not reach target position within {timeout} seconds"
+            )
+
     def init_position(self, pull_wire=False):
         """
         Move all motors to zero position
         """
-        self.move_motor(1, self.m1_zero)
-        self.move_motor(0, self.m0_zero)
-        self.move_motor(2, self.m2_zero)
+        self.move_motor_and_wait(1, self.m1_zero)
+        self.move_motor_and_wait(0, self.m0_zero)
+        self.move_motor_and_wait(2, self.m2_zero)
 
-        sleep(0.5)
         if pull_wire:
             self.set_wire_tension(1)
 

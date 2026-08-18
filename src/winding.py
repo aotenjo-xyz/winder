@@ -106,6 +106,12 @@ class Wind:
             self.m3_slow_wind_torque = 0.03
             self.m3_pull_wire_torque = self.config.motor.M3.pull_wire_torque
 
+        # set PID parameters for M0, M1, M2 (M3 is torque control, no need to set PID parameters)
+        for motor_id in range(3):
+            self.set_pid_parameters(motor_id)
+
+        self.logger.info("PID parameters set for M0, M1, M2")
+
     def calculate_motor_position_in_simulation(self, motor_id, timestamp=None):
         target_position = self.motor_positions[motor_id]
         velocity = self.motor_velocities[motor_id]
@@ -409,6 +415,11 @@ class Wind:
         return getattr(self.config.motor, f"M{motor_id}")
 
     def set_pid_parameters(self, motor_id):
+        if motor_id == 3:
+            self.logger.debug(
+                "Motor 3 is torque control, no need to set PID parameters"
+            )
+            return
         motor_config = self._get_motor_config(motor_id)
         vP = motor_config.vP
         vI = motor_config.vI
@@ -426,6 +437,9 @@ class Wind:
             self.logger.debug(command.strip())
 
     def get_motor_pid_parameters(self, motor_id):
+        if motor_id == 3:
+            self.logger.debug("Motor 3 is torque control, no PID parameters")
+            return None
         if self.simulation:
             motor_config = self._get_motor_config(motor_id)
             return {

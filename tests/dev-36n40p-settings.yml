@@ -14,16 +14,40 @@ motor:
     wind_range_start: -25.5
     end_to_zero: 9.0
     velocity: 10.0
+    vP: 0.2
+    vI: 20.0
+    vD: 0.001
+    pP: 20.0
+    voltage_limit: 6.0
+    velocirty_limit: 10.0
+    lpfTf: 0.01
+
   M1:
     direction: true
     zero: 0.0
     end_to_rotating_position: 6.0
     velocity: 1.0
+    vP: 0.2
+    vI: 20.0
+    vD: 0.001
+    pP: 5.0
+    voltage_limit: 6.0
+    velocirty_limit: 10.0
+    lpfTf: 0.01
+
   M2:
     direction: true
     zero: 0.0
     angle_to_prevent_collision: 1.0
     velocity: 20.0
+    vP: 0.2
+    vI: 20.0
+    vD: 0.001
+    pP: 20.0
+    voltage_limit: 24.0
+    velocirty_limit: 15.0
+    lpfTf: 0.01
+
   M3:
     direction: false
     pull_wire_torque: 0.15

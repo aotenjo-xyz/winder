@@ -293,7 +293,7 @@ class Wind:
         k = 1
         # winding counter-clockwise
         direction = -1
-        self.move_motor(
+        self.move_motor_and_wait(
             1,
             self.m1_zero + direction * (math.pi * 2 / self.teeth_count) * teeth_idx * k,
         )
@@ -364,14 +364,12 @@ class Wind:
     def move_wire_to_right_position(self, teeth_idx):
         # move to teeth_idx - 1 and rotate motor2 by 180 degrees clockwise
         self.move_to_teeth(teeth_idx - 1)
-        sleep(0.7)
-        self.move_motor(0, self.m0_wind_range[0])
-        sleep(1)
+        self.move_motor_and_wait(0, self.m0_wind_range[0])
         if self.motor2_pos == Motor2State.TOP_LEFT:
             target_motor2_pos = (
                 self.motor_positions[2] + math.pi + self.m2_angle_to_prevent_collision
             )
-            self.move_motor(2, target_motor2_pos)
+            self.move_motor_and_wait(2, target_motor2_pos, 0.1)
         else:
             self.logger.warning("motor2_pos is not TOP_LEFT")
             self.logger.warning(
@@ -380,25 +378,22 @@ class Wind:
             raise Exception("motor2_pos is not TOP_LEFT")
         self.motor2_pos = Motor2State.BOTTOM
 
-        sleep(0.3)
-
         motor2_pos = self.get_motor_position(2)
         assert (
             abs(motor2_pos - target_motor2_pos) < 0.1
         ), f"motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}"
 
-        self.move_motor(0, self.m1_rotating_position)
-        sleep(1.0)
+        self.move_motor_and_wait(0, self.m1_rotating_position)
 
     def set_motor2_wire_position(self):
         if self.motor2_pos == Motor2State.TOP_LEFT:
-            self.move_motor(
-                2, self.motor_positions[2] + self.m2_angle_to_prevent_collision * 2
+            self.move_motor_and_wait(
+                2, self.motor_positions[2] + self.m2_angle_to_prevent_collision * 2, 0.1
             )
             self.motor2_pos = Motor2State.TOP_RIGHT
         elif self.motor2_pos == Motor2State.BOTTOM_LEFT:
-            self.move_motor(
-                2, self.motor_positions[2] - self.m2_angle_to_prevent_collision * 2
+            self.move_motor_and_wait(
+                2, self.motor_positions[2] - self.m2_angle_to_prevent_collision * 2, 0.1
             )
             self.motor2_pos = Motor2State.BOTTOM_RIGHT
         elif self.motor2_pos == Motor2State.TOP:
@@ -406,8 +401,8 @@ class Wind:
             self.logger.debug("Motor2 is at top position")  # do nothing
         elif self.motor2_pos == Motor2State.BOTTOM:
             self.logger.debug("Motor2 is at bottom position")
-            self.move_motor(
-                2, self.motor_positions[2] - self.m2_angle_to_prevent_collision
+            self.move_motor_and_wait(
+                2, self.motor_positions[2] - self.m2_angle_to_prevent_collision, 0.1
             )
             self.motor2_pos = Motor2State.BOTTOM_RIGHT
 
@@ -473,17 +468,17 @@ class Wind:
 
     def prevent_collision(self, clockwise):
         if self.is_motor2_at_12oclock() and not clockwise:
-            self.move_motor(
+            self.move_motor_and_wait(
                 2, self.motor_positions[2] - self.m2_angle_to_prevent_collision
             )
             self.motor2_pos = Motor2State.TOP_LEFT
         elif self.is_motor2_at_12oclock() and clockwise:
-            self.move_motor(
+            self.move_motor_and_wait(
                 2, self.motor_positions[2] + self.m2_angle_to_prevent_collision
             )
             self.motor2_pos = Motor2State.TOP_RIGHT
         else:
-            self.move_motor(
+            self.move_motor_and_wait(
                 2, self.motor_positions[2] + self.m2_angle_to_prevent_collision
             )
             self.motor2_pos = Motor2State.BOTTOM_LEFT
@@ -523,13 +518,10 @@ class Wind:
     def wind_wire(self, teeth_idx: int, clockwise, wind_idx):
         # rotate motor1
         self.move_to_teeth(teeth_idx)
-        self.set_wire_tension(1)
-        self.move_motor(0, self.m0_wind_range[1])
-        sleep(0.8)
+        self.set_wire_tension(0.5)
+        self.move_motor_and_wait(0, self.m0_wind_range[1])
         self.set_motor2_wire_position()
-        sleep(0.2)
-        self.move_motor(0, self.m0_wind_range[0])
-        sleep(1.2)
+        self.move_motor_and_wait(0, self.m0_wind_range[0])
 
         init_motor2_pos = self.get_init_motor2_pos()
         target_motor2_pos = self.get_target_motor2_pos(clockwise, wind_idx)
@@ -558,11 +550,7 @@ class Wind:
                     continue
                 break
 
-        sleep(0.5)
-        motor2_pos = self.get_motor_position(2)
-        assert (
-            abs(motor2_pos - target_motor2_pos) < 0.1
-        ), f"motor2_pos: {motor2_pos}, target_motor2_pos: {target_motor2_pos}"
+        self.move_motor_and_wait(2, target_motor2_pos, 0.1)
 
         self.logger.info(f"Winding teeth {teeth_idx} done")
 
@@ -570,10 +558,8 @@ class Wind:
         skip_prevent_collision_teeth_idx = [self.teeth_count - 1]
         if teeth_idx not in skip_prevent_collision_teeth_idx:
             self.prevent_collision(clockwise)
-        sleep(0.7)
 
-        self.move_motor(0, self.m1_rotating_position)
-        sleep(1.5)
+        self.move_motor_and_wait(0, self.m1_rotating_position)
 
     def get_start_teeth_idx(self, wire_idx: int) -> int:
         return self.teeth_index_matrix[wire_idx][self.starts_at]
@@ -588,7 +574,6 @@ class Wind:
         try:
             start_teeth_idx = self.get_start_teeth_idx(wire_idx)
             self.move_to_teeth(start_teeth_idx)
-            sleep(0.5)
 
             if is_starting_from_bottom(
                 self.starts_at, self.winding_config, self.teeth_index_matrix[wire_idx]
@@ -603,7 +588,6 @@ class Wind:
                 clockwise = is_clockwise(self.winding_config, teeth_idx)
                 if self.starts_at == i and i != 0:
                     self.prevent_collision(clockwise)
-                    sleep(0.3)
 
                     self.move_motor(0, self.m1_rotating_position)
 
@@ -626,20 +610,18 @@ class Wind:
         starting_from_cw = self.is_starting_from_cw(next_wire_idx)
 
         if starting_from_cw:
-            self.move_motor(1, self.m1_zero - motor1_rotation)
+            self.move_motor_and_wait(1, self.m1_zero - motor1_rotation)
             self.m1_zero -= motor1_rotation
         else:
-            self.move_motor(1, self.m1_zero + motor1_rotation)
+            self.move_motor_and_wait(1, self.m1_zero + motor1_rotation)
             self.m1_zero += motor1_rotation + math.pi * 2
 
-        sleep(1.5)
-
         if self.motor2_pos == Motor2State.TOP_LEFT:
-            self.move_motor(
+            self.move_motor_and_wait(
                 2, self.motor_positions[2] + self.m2_angle_to_prevent_collision
             )
         elif self.motor2_pos == Motor2State.TOP_RIGHT:
-            self.move_motor(
+            self.move_motor_and_wait(
                 2, self.motor_positions[2] - self.m2_angle_to_prevent_collision
             )
         else:
@@ -648,7 +630,6 @@ class Wind:
                 f"motor2_pos: {self.motor_positions[2]}, self.motor2_pos: {self.motor2_pos}"
             )
             raise Exception("motor2_pos is not TOP_LEFT or TOP_RIGHT")
-        sleep(0.5)
         self.motor2_pos = Motor2State.TOP
         motor2_pos = self.get_motor_position(2)
         self.m2_zero = motor2_pos

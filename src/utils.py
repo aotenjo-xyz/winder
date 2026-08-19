@@ -1,6 +1,8 @@
 import logging
 import os
 import math
+import yaml
+from .schema import MachineConfig
 
 
 class ColorFormatter(logging.Formatter):
@@ -61,15 +63,13 @@ def init_logger(config=None):
     return logger
 
 
-def load_config(config_path):
-    import yaml
-
+def load_config(config_path) -> MachineConfig:
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file '{config_path}' not found.")
 
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
-    return config
+    return MachineConfig.model_validate(config)
 
 
 def get_winding_teeth_indices(winding_config: str):

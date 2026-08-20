@@ -1,3 +1,5 @@
+import threading
+
 import serial
 import time
 from time import sleep
@@ -40,6 +42,7 @@ class MotorPosition(BaseModel):
 class Wind:
 
     def __init__(self, config_path, simulation=False, turns=None):
+        self.serial_lock = threading.RLock()
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
         self.config = load_config(config_path)
@@ -271,15 +274,16 @@ class Wind:
             update_motor_position(self.conn, motor_id, motor_position_in_simulation)
             return motor_position_in_simulation
         # Run M<motor_id>P to get the current position of the motor
-        self.send_serial_command(f"M{motor_id}P")
+        with self.serial_lock:
+            self.send_serial_command(f"M{motor_id}P")
 
-        # Read the response
-        # Response format: M<motor_id>P<position>
-        while True:
-            if self.ser.in_waiting:
-                line = self.ser.readline().decode("utf-8").rstrip()
-                if len(line) > 2 and line[:3] == f"M{motor_id}P":
-                    break
+            # Read the response
+            # Response format: M<motor_id>P<position>
+            while True:
+                if self.ser.in_waiting:
+                    line = self.ser.readline().decode("utf-8").rstrip()
+                    if len(line) > 2 and line[:3] == f"M{motor_id}P":
+                        break
         motor_position = float(line.split("P")[1])
         motor_position = self.check_motor_direction(motor_id, motor_position)
         if motor_id == 2:

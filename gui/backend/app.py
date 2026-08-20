@@ -252,6 +252,7 @@ def wind_confirm(wire_idx: int, body: ConfirmRequest):
             return {"status": "canceled"}
 
     def _do_wind():
+        wind.init_position(True)
         wind.wind(wire_idx)
         wind.move_motor(0, wind.m0_zero)
 

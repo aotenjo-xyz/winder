@@ -1,0 +1,86 @@
+name: Release Tauri Application
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-22.04
+            bundles: deb,appimage
+          - name: Windows
+            os: windows-latest
+            bundles: nsis
+          - name: macOS
+            os: macos-latest
+            bundles: dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: gui/frontend/package-lock.json
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.12"
+          environment-file: environment.yml
+          activate-environment: winding
+
+      - name: Install Tauri system dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            patchelf
+
+      - name: Install Python backend dependencies
+        shell: bash -el {0}
+        run: pip install -r gui/backend/requirements.txt
+
+      - name: Build Python backend sidecar
+        shell: bash -el {0}
+        run: bash gui/backend/build_sidecar.sh
+
+      - name: Install frontend dependencies
+        shell: bash
+        working-directory: gui/frontend
+        run: npm ci
+
+      - name: Build and publish Tauri bundles
+        uses: tauri-apps/tauri-action@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: gui/frontend
+          tauriScript: npm run tauri
+          args: --bundles ${{ matrix.bundles }}
+          releaseId: ${{ github.event_name == 'release' && github.event.release.id || '' }}
+          tagName: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: tauri-[platform]-[arch]-[bundle]

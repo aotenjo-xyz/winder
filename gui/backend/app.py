@@ -205,7 +205,7 @@ def _require_idle():
         )
 
 
-@app.post("/api/wind/{wire_idx}/precheck")
+@app.post("/api/wind/{wire_idx:int}/precheck")
 def wind_precheck(wire_idx: int):
     """Mirrors the CLI's wire-position confirmation step, before winding starts."""
     wind = _get_wind()
@@ -247,7 +247,7 @@ def _run_in_background(target_fn, operation_name):
     threading.Thread(target=_runner, daemon=True).start()
 
 
-@app.post("/api/wind/{wire_idx}/confirm")
+@app.post("/api/wind/{wire_idx:int}/confirm")
 def wind_confirm(wire_idx: int, body: ConfirmRequest):
     wind = _get_wind()
     with state.lock:

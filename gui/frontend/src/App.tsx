@@ -65,7 +65,11 @@ function App() {
     setActionError(null);
     try {
       const result = await api.continuousPrecheck();
-      setPending({ target: "continuous", message: result.message });
+      if (result.confirmation_required) {
+        setPending({ target: "continuous", message: result.message });
+      } else {
+        await api.continuousConfirm(true);
+      }
     } catch (err) {
       setActionError((err as Error).message);
     }

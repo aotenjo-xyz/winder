@@ -180,18 +180,21 @@ def disconnect():
 @app.get("/api/status")
 def status():
     body = state.to_dict()
-    if state.wind is not None:
-        try:
-            body["positions"] = {
-                "M0": state.wind.get_motor_position(0),
-                "M1": state.wind.get_motor_position(1),
-                "M2": state.wind.get_motor_position(2),
-                "M3": state.wind.get_motor_position(3),
-            }
-        except Exception:
-            body["positions"] = None
-    else:
+    wind = state.wind
+    if wind is None or state.op_state == OperationState.RUNNING:
         body["positions"] = None
+        return body
+
+    try:
+        body["positions"] = {
+            "M0": wind.get_motor_position(0),
+            "M1": wind.get_motor_position(1),
+            "M2": wind.get_motor_position(2),
+            "M3": wind.get_motor_position(3),
+        }
+    except Exception:
+        body["positions"] = None
+
     return body
 
 
@@ -202,7 +205,7 @@ def _require_idle():
         )
 
 
-@app.post("/api/wind/{wire_idx}/precheck")
+@app.post("/api/wind/{wire_idx:int}/precheck")
 def wind_precheck(wire_idx: int):
     """Mirrors the CLI's wire-position confirmation step, before winding starts."""
     wind = _get_wind()
@@ -244,7 +247,7 @@ def _run_in_background(target_fn, operation_name):
     threading.Thread(target=_runner, daemon=True).start()
 
 
-@app.post("/api/wind/{wire_idx}/confirm")
+@app.post("/api/wind/{wire_idx:int}/confirm")
 def wind_confirm(wire_idx: int, body: ConfirmRequest):
     wind = _get_wind()
     with state.lock:

@@ -1,3 +1,5 @@
+import threading
+
 import serial
 import time
 from time import sleep
@@ -40,6 +42,7 @@ class MotorPosition(BaseModel):
 class Wind:
 
     def __init__(self, config_path, simulation=False, turns=None):
+        self.serial_lock = threading.RLock()
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
         self.config = load_config(config_path)
@@ -205,6 +208,7 @@ class Wind:
         self.move_motor_and_wait(1, self.m1_zero)
         self.move_motor_and_wait(0, self.m0_zero)
         self.move_motor_and_wait(2, self.m2_zero)
+        self.motor2_pos = Motor2State.TOP
 
         if pull_wire:
             self.set_wire_tension(1)
@@ -271,15 +275,22 @@ class Wind:
             update_motor_position(self.conn, motor_id, motor_position_in_simulation)
             return motor_position_in_simulation
         # Run M<motor_id>P to get the current position of the motor
-        self.send_serial_command(f"M{motor_id}P")
+        with self.serial_lock:
+            self.send_serial_command(f"M{motor_id}P")
 
-        # Read the response
-        # Response format: M<motor_id>P<position>
-        while True:
-            if self.ser.in_waiting:
-                line = self.ser.readline().decode("utf-8").rstrip()
-                if len(line) > 2 and line[:3] == f"M{motor_id}P":
-                    break
+            # Read the response
+            # Response format: M<motor_id>P<position>
+            start = time.monotonic()
+            while True:
+                if self.ser.in_waiting:
+                    line = self.ser.readline().decode("utf-8").rstrip()
+                    if len(line) > 2 and line[:3] == f"M{motor_id}P":
+                        break
+                if time.monotonic() - start > 1.0:
+                    raise TimeoutError(
+                        f"Timed out waiting for motor {motor_id} position response"
+                    )
+                sleep(0.01)
         motor_position = float(line.split("P")[1])
         motor_position = self.check_motor_direction(motor_id, motor_position)
         if motor_id == 2:

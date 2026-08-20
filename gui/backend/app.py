@@ -122,6 +122,10 @@ class ConfirmRequest(BaseModel):
     confirmed: bool
 
 
+class MoveMotorRequest(BaseModel):
+    target: float
+
+
 def _get_wind() -> Wind:
     if state.wind is None:
         raise HTTPException(status_code=503, detail="Machine not connected yet")
@@ -289,6 +293,18 @@ def estop():
         state.operation = None
         state.message = "Emergency stop triggered"
     return {"status": "stopped"}
+
+
+@app.post("/api/motor/{motor_id}/move")
+def move_motor(motor_id: int, body: MoveMotorRequest):
+    """Move a single motor to an arbitrary position, for initial calibration (see scripts/calib.py)."""
+    wind = _get_wind()
+    if motor_id not in (0, 1, 2, 3):
+        raise HTTPException(status_code=400, detail="motor_id must be 0, 1, 2, or 3")
+    with state.lock:
+        _require_idle()
+    wind.move_motor(motor_id, body.target)
+    return {"status": "ok"}
 
 
 @app.post("/api/state/reset")

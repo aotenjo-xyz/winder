@@ -52,5 +52,10 @@ export const api = {
       body: JSON.stringify({ confirmed }),
     }),
   estop: () => request<{ status: string }>("/api/estop", { method: "POST" }),
+  moveMotor: (motorId: number, target: number) =>
+    request<{ status: string }>(`/api/motor/${motorId}/move`, {
+      method: "POST",
+      body: JSON.stringify({ target }),
+    }),
   resetState: () => request<{ status: string }>("/api/state/reset", { method: "POST" }),
 };

@@ -14,6 +14,9 @@ function App() {
   const [connectError, setConnectError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
+  const [calibMotorId, setCalibMotorId] = useState(0);
+  const [calibTarget, setCalibTarget] = useState("0");
+  const [calibError, setCalibError] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -94,6 +97,22 @@ function App() {
     }
   };
 
+  const moveMotor = async () => {
+    setCalibError(null);
+    const target = Number(calibTarget);
+    if (Number.isNaN(target)) {
+      setCalibError("Enter a valid number");
+      return;
+    }
+    try {
+      await api.moveMotor(calibMotorId, target);
+    } catch (err) {
+      setCalibError((err as Error).message);
+    } finally {
+      refreshStatus();
+    }
+  };
+
   const busy = status?.state === "running" || status?.state === "awaiting_confirmation";
 
   return (
@@ -150,6 +169,32 @@ function App() {
               </button>
             </div>
             {actionError && <p className="error">{actionError}</p>}
+          </section>
+
+          <section className="card">
+            <h2>Calibration</h2>
+            <p className="message">Move a single motor to an exact position (for finding zero positions).</p>
+            <div className="row">
+              <select
+                value={calibMotorId}
+                onChange={(e) => setCalibMotorId(Number(e.target.value))}
+              >
+                <option value={0}>M0</option>
+                <option value={1}>M1</option>
+                <option value={2}>M2</option>
+                <option value={3}>M3</option>
+              </select>
+              <input
+                type="number"
+                step="0.01"
+                value={calibTarget}
+                onChange={(e) => setCalibTarget(e.target.value)}
+              />
+              <button disabled={busy} onClick={moveMotor}>
+                Move
+              </button>
+            </div>
+            {calibError && <p className="error">{calibError}</p>}
           </section>
 
           <section className="card danger">

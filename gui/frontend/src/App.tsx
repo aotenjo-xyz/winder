@@ -189,6 +189,9 @@ function App() {
                 step="0.01"
                 value={calibTarget}
                 onChange={(e) => setCalibTarget(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") moveMotor();
+                }}
               />
               <button disabled={busy} onClick={moveMotor}>
                 Move

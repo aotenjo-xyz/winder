@@ -108,7 +108,11 @@ app = FastAPI(title="Winder Control API")
 app.add_middleware(
     CORSMiddleware,
     # The Tauri WebView is the only client of this localhost-only service.
-    allow_origins=["tauri://localhost", "http://localhost:1420", "http://127.0.0.1:1420"],
+    allow_origins=[
+        "tauri://localhost",
+        "http://localhost:1420",
+        "http://127.0.0.1:1420",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )

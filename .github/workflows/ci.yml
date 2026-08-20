@@ -179,6 +179,22 @@ jobs:
         working-directory: gui/frontend
         run: npm ci
 
+      # Tauri validates every externalBin entry during compilation. The real
+      # PyInstaller sidecar is built by tauri-release.yml; this compile-only
+      # job needs only a correctly named placeholder.
+      - name: Create placeholder backend sidecar
+        shell: bash -el {0}
+        working-directory: gui/frontend
+        run: |
+          target_triple="$(rustc --print host-tuple)"
+          extension=""
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            extension=".exe"
+          fi
+          mkdir -p src-tauri/binaries
+          touch "src-tauri/binaries/winder-backend-${target_triple}${extension}"
+          chmod +x "src-tauri/binaries/winder-backend-${target_triple}${extension}"
+
       - name: Test Tauri release build
         shell: bash -el {0}
         working-directory: gui/frontend

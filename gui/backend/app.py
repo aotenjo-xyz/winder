@@ -299,6 +299,8 @@ def estop():
     with state.lock:
         state.op_state = OperationState.IDLE
         state.operation = None
+        state.pending_wire_idx = None
+        state.error = None
         state.message = "Emergency stop triggered"
     return {"status": "stopped"}
 

@@ -208,6 +208,7 @@ class Wind:
         self.move_motor_and_wait(1, self.m1_zero)
         self.move_motor_and_wait(0, self.m0_zero)
         self.move_motor_and_wait(2, self.m2_zero)
+        self.motor2_pos = Motor2State.TOP
 
         if pull_wire:
             self.set_wire_tension(1)

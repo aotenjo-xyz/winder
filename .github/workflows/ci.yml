@@ -127,29 +127,29 @@ jobs:
           name: simulation-${{ matrix.artifact }}
           path: ${{ matrix.output }}
         
-  gui-export:
-    name: GUI Export (${{ matrix.os }})
+  tauri-export:
+    name: Tauri Export (${{ matrix.os }})
     continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
-            preset: Linux/X11
-            output: gui/frontend/dist/gui.x86_64
-            output_rel: frontend/dist/gui.x86_64
+            preset: Linux
+            output: gui/backend/target/release/winding
+            output_rel: target/release/winding
             artifact: linux
             allow_failure: false
           - os: windows-latest
-            preset: Windows Desktop
-            output: gui/frontend/dist/gui.exe
-            output_rel: frontend/dist/gui.exe
+            preset: Windows
+            output: gui/backend/target/release/winding.exe
+            output_rel: target/release/winding.exe
             artifact: windows
             allow_failure: false
           - os: macos-latest
             preset: macOS
-            output: gui/frontend/dist/gui.app
-            output_rel: frontend/dist/gui.app
+            output: gui/backend/target/release/winding.app
+            output_rel: target/release/winding.app
             artifact: macos
             allow_failure: true
 
@@ -157,31 +157,29 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: chickensoft-games/setup-godot@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          version: 4.6.0
-          use-dotnet: false
-          include-templates: true
+          profile: minimal
+          toolchain: stable
+          override: true
 
-      - name: Show configured export presets
-        shell: bash
+      - name: Install Rust dependencies for Tauri build
+        shell: bash -el {0}
         run: |
-          grep -E '^name="' gui/frontend/export_presets.cfg || true
+          sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev
 
-      - name: Export GUI
-        shell: bash
+      - name: Build Tauri application in release mode
+        shell: bash -el {0}
         run: |
-          mkdir -p gui/frontend/dist
-          cd gui/frontend
-          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.output_rel }}"
+          cd gui/backend && cargo build --release
 
-      - name: Verify export output exists
-        shell: bash
+      - name: Verify Tauri build output exists
+        shell: bash -el {0}
         run: |
           test -e "${{ matrix.output }}"
 
-      - name: Upload export artifact
+      - name: Upload Tauri build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gui-${{ matrix.artifact }}
+          name: tauri-${{ matrix.artifact }}
           path: ${{ matrix.output }}

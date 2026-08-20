@@ -136,20 +136,17 @@ jobs:
         include:
           - os: ubuntu-latest
             preset: Linux
-            output: gui/backend/target/release/winding
-            output_rel: target/release/winding
+            output: gui/frontend/target/release/winder-gui
             artifact: linux
             allow_failure: false
           - os: windows-latest
             preset: Windows
-            output: gui/backend/target/release/winding.exe
-            output_rel: target/release/winding.exe
+            output: gui/frontend/target/release/winder-gui.exe
             artifact: windows
             allow_failure: false
           - os: macos-latest
             preset: macOS
-            output: gui/backend/target/release/winding.app
-            output_rel: target/release/winding.app
+            output: gui/frontend/target/release/winder-gui.app
             artifact: macos
             allow_failure: true
 
@@ -172,7 +169,7 @@ jobs:
       - name: Build Tauri application in release mode
         shell: bash -el {0}
         run: |
-          cd gui/backend && cargo build --release
+          cd gui/frontend/src-tauri && cargo build --release
 
       - name: Verify Tauri build output exists
         shell: bash -el {0}

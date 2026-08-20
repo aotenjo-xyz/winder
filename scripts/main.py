@@ -1,5 +1,4 @@
 from src.winding import Wind
-from time import sleep
 import sys
 from typing import Sequence
 

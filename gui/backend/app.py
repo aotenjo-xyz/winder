@@ -19,10 +19,18 @@ import threading
 import traceback
 from enum import Enum
 from typing import Optional
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from src.winding import Wind
+
 
 # Allow `from src.winding import Wind` to resolve when this file is executed
 # directly (e.g. from the PyInstaller-built sidecar) instead of as a package.
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_REPO_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
@@ -62,13 +70,6 @@ def _default_config_path() -> str:
 # matter what process/directory launched this sidecar.
 os.makedirs(os.path.join(_user_config_dir(), "data"), exist_ok=True)
 os.chdir(_user_config_dir())
-
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-from src.winding import Wind
 
 
 class OperationState(str, Enum):
@@ -153,7 +154,11 @@ def connect(body: ConnectRequest):
         state.wind = wind
         state.op_state = OperationState.IDLE
         state.message = "Connected"
-    return {"status": "connected", "simulation": body.simulation, "config_path": config_path}
+    return {
+        "status": "connected",
+        "simulation": body.simulation,
+        "config_path": config_path,
+    }
 
 
 @app.post("/api/disconnect")
@@ -243,7 +248,9 @@ def wind_confirm(wire_idx: int, body: ConfirmRequest):
             state.op_state != OperationState.AWAITING_CONFIRMATION
             or state.pending_wire_idx != wire_idx
         ):
-            raise HTTPException(status_code=409, detail="No pending confirmation for this wire")
+            raise HTTPException(
+                status_code=409, detail="No pending confirmation for this wire"
+            )
         if not body.confirmed:
             state.op_state = OperationState.IDLE
             state.operation = None

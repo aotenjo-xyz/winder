@@ -108,7 +108,7 @@ app = FastAPI(title="Winder Control API")
 app.add_middleware(
     CORSMiddleware,
     # The Tauri WebView is the only client of this localhost-only service.
-    allow_origins=["*"],
+    allow_origins=["tauri://localhost", "http://localhost:1420", "http://127.0.0.1:1420"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -192,7 +192,7 @@ def status():
 
 
 def _require_idle():
-    if state.op_state != OperationState.IDLE:
+    if state.op_state in (OperationState.AWAITING_CONFIRMATION, OperationState.RUNNING):
         raise HTTPException(
             status_code=409, detail=f"An operation is already {state.op_state.value}"
         )
@@ -299,6 +299,8 @@ def estop():
     with state.lock:
         state.op_state = OperationState.IDLE
         state.operation = None
+        state.pending_wire_idx = None
+        state.error = None
         state.message = "Emergency stop triggered"
     return {"status": "stopped"}
 

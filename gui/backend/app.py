@@ -192,7 +192,7 @@ def status():
 
 
 def _require_idle():
-    if state.op_state != OperationState.IDLE:
+    if state.op_state in (OperationState.AWAITING_CONFIRMATION, OperationState.RUNNING):
         raise HTTPException(
             status_code=409, detail=f"An operation is already {state.op_state.value}"
         )

@@ -164,9 +164,10 @@ jobs:
           override: true
 
       - name: Install Rust dependencies for Tauri build
+        if: runner.os == 'Linux'
         shell: bash -el {0}
         run: |
-          sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev
+          sudo apt-get update && sudo apt-get install -y libssl-dev libgtk-3-dev
 
       - name: Build Tauri application in release mode
         shell: bash -el {0}

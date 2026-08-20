@@ -26,7 +26,7 @@ motor:
     direction: true
     zero: 0.0
     end_to_rotating_position: 6.0
-    velocity: 1.0
+    velocity: 10.0
     vP: 0.2
     vI: 20.0
     vD: 0.001

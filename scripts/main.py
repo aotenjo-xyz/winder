@@ -1,5 +1,4 @@
 from src.winding import Wind
-from time import sleep
 import sys
 from typing import Sequence
 
@@ -121,24 +120,14 @@ def _wind_menu(wind: Wind):
                 ("back", "back"),
             ],
         )
-        if choice == "wire0":
-            sleep(0.1)
-            if not _wire_position_confirmation(wind, 0):
+        wire_idx = {"wire0": 0, "wire1": 1, "wire2": 2}.get(choice)
+        if wire_idx is not None:
+            if not _wire_position_confirmation(wind, wire_idx):
                 continue
-            wind.wind(0)
+            wind.init_position(True)
+            wind.wind(wire_idx)
             wind.move_motor(0, wind.m0_zero)
-        elif choice == "wire1":
-            sleep(0.1)
-            if not _wire_position_confirmation(wind, 1):
-                continue
-            wind.wind(1)
-            wind.move_motor(0, wind.m0_zero)
-        elif choice == "wire2":
-            sleep(0.1)
-            if not _wire_position_confirmation(wind, 2):
-                continue
-            wind.wind(2)
-            wind.move_motor(0, wind.m0_zero)
+
         elif choice == "continuous":
             if not _wire_position_confirmation(wind, 0):
                 continue

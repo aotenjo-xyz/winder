@@ -1,0 +1,5 @@
+# Additional dependencies for the GUI backend, on top of the project's
+# existing dependencies (pydantic, pyserial, pyyaml — see ../../pyproject.toml).
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pyinstaller==6.10.0

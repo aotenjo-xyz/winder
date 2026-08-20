@@ -1,0 +1,98 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: light dark;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.card {
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.4);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.positions {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.position {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.position .label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.position .value {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-line {
+  margin: 0.25rem 0;
+}
+
+.message {
+  opacity: 0.8;
+}
+
+.error {
+  color: #d33;
+}
+
+.danger {
+  text-align: center;
+}
+
+.estop {
+  background: #d33;
+  color: white;
+  font-weight: bold;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  color: black;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 400px;
+}

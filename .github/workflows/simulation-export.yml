@@ -1,0 +1,69 @@
+name: Simulation Export
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "simulation/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "simulation/**"
+
+jobs:
+  export:
+    name: Simulation Export (${{ matrix.os }})
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            preset: Linux
+            output: simulation/bin/simulation.x86_64
+            output_rel: bin/simulation.x86_64
+            artifact: linux
+            allow_failure: false
+          - os: windows-latest
+            preset: Windows
+            output: simulation/bin/simulation.exe
+            output_rel: bin/simulation.exe
+            artifact: windows
+            allow_failure: false
+          - os: macos-latest
+            preset: macOS
+            output: simulation/bin/simulation.app
+            output_rel: bin/simulation.app
+            artifact: macos
+            allow_failure: true
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.0
+          use-dotnet: false
+          include-templates: true
+
+      - name: Show configured export presets
+        shell: bash
+        run: grep -E '^name="' simulation/export_presets.cfg || true
+
+      - name: Export simulation
+        shell: bash
+        run: |
+          mkdir -p simulation/bin
+          cd simulation
+          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.output_rel }}"
+
+      - name: Verify export output exists
+        shell: bash
+        run: test -e "${{ matrix.output }}"
+
+      - name: Upload export artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-${{ matrix.artifact }}
+          path: ${{ matrix.output }}

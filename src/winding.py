@@ -280,11 +280,17 @@ class Wind:
 
             # Read the response
             # Response format: M<motor_id>P<position>
+            start = time.monotonic()
             while True:
                 if self.ser.in_waiting:
                     line = self.ser.readline().decode("utf-8").rstrip()
                     if len(line) > 2 and line[:3] == f"M{motor_id}P":
                         break
+                if time.monotonic() - start > 1.0:
+                    raise TimeoutError(
+                        f"Timed out waiting for motor {motor_id} position response"
+                    )
+                sleep(0.01)
         motor_position = float(line.split("P")[1])
         motor_position = self.check_motor_direction(motor_id, motor_position)
         if motor_id == 2:

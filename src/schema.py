@@ -5,6 +5,8 @@ class SerialConfig(BaseModel):
     port: str
     baudrate: int = Field(gt=0)
 
+class LoggingConfig(BaseModel):
+    level: str
 
 class Motor0Config(BaseModel):
     direction: bool
@@ -72,5 +74,6 @@ class WindingConfig(BaseModel):
 
 class MachineConfig(BaseModel):
     serial: SerialConfig
+    logging: LoggingConfig
     motor: MotorConfig
     winding: WindingConfig

@@ -10,7 +10,6 @@ config_file = "settings.yml"
 config = load_config(config_file)
 fps = 60
 frame_duration = 1 / fps
-# logger = init_logger()
 
 motor_velocities = [
     config["motor"]["M0"]["velocity"],

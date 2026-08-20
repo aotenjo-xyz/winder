@@ -126,3 +126,62 @@ jobs:
         with:
           name: simulation-${{ matrix.artifact }}
           path: ${{ matrix.output }}
+        
+  gui-export:
+    name: GUI Export (${{ matrix.os }})
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            preset: Linux/X11
+            output: gui/frontend/dist/gui.x86_64
+            output_rel: frontend/dist/gui.x86_64
+            artifact: linux
+            allow_failure: false
+          - os: windows-latest
+            preset: Windows Desktop
+            output: gui/frontend/dist/gui.exe
+            output_rel: frontend/dist/gui.exe
+            artifact: windows
+            allow_failure: false
+          - os: macos-latest
+            preset: macOS
+            output: gui/frontend/dist/gui.app
+            output_rel: frontend/dist/gui.app
+            artifact: macos
+            allow_failure: true
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.0
+          use-dotnet: false
+          include-templates: true
+
+      - name: Show configured export presets
+        shell: bash
+        run: |
+          grep -E '^name="' gui/frontend/export_presets.cfg || true
+
+      - name: Export GUI
+        shell: bash
+        run: |
+          mkdir -p gui/frontend/dist
+          cd gui/frontend
+          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.output_rel }}"
+
+      - name: Verify export output exists
+        shell: bash
+        run: |
+          test -e "${{ matrix.output }}"
+
+      - name: Upload export artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gui-${{ matrix.artifact }}
+          path: ${{ matrix.output }}

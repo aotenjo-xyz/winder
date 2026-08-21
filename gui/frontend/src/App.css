@@ -68,6 +68,43 @@ button:disabled {
   color: #d33;
 }
 
+.success {
+  color: #198754;
+}
+
+.settings-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.settings-fields fieldset {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.settings-fields legend {
+  font-weight: 600;
+}
+
+.settings-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.settings-fields input:not([type="checkbox"]) {
+  padding: 0.5rem;
+}
+
+.settings-fields input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
 .danger {
   text-align: center;
 }

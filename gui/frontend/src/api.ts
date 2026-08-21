@@ -28,8 +28,33 @@ export interface PrecheckResponse {
   message: string;
 }
 
+export type SettingValue = string | number | boolean | SettingsObject;
+
+export interface SettingsObject {
+  [key: string]: SettingValue;
+}
+
+export interface SettingsResponse {
+  config_path: string;
+  settings: SettingsObject;
+}
+
 export const api = {
   configPath: () => request<{ config_path: string }>("/api/config-path"),
+  settings: () => request<SettingsResponse>("/api/settings"),
+  updateSettings: (settings: SettingsObject) =>
+    request<{
+      status: string;
+      config_path: string;
+      reloaded: boolean;
+      reconnect_required: boolean;
+    }>(
+      "/api/settings",
+      {
+        method: "PUT",
+        body: JSON.stringify(settings),
+      },
+    ),
   connect: (simulation: boolean, configPath?: string) =>
     request<{ status: string; config_path: string }>("/api/connect", {
       method: "POST",

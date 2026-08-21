@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { api, StatusResponse } from "./api";
+import { api, SettingValue, SettingsResponse, StatusResponse } from "./api";
 import "./App.css";
 
 type PendingConfirmation = {
@@ -7,6 +7,61 @@ type PendingConfirmation = {
   wireIdx?: number;
   message: string;
 };
+
+function settingLabel(key: string) {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (character: string) => character.toUpperCase());
+}
+
+function SettingsFields({
+  settings,
+  onChange,
+}: {
+  settings: Record<string, SettingValue>;
+  onChange: (settings: Record<string, SettingValue>) => void;
+}) {
+  return (
+    <div className="settings-fields">
+      {Object.entries(settings).map(([key, value]) => {
+        if (typeof value === "object") {
+          return (
+            <fieldset key={key}>
+              <legend>{settingLabel(key)}</legend>
+              <SettingsFields
+                settings={value}
+                onChange={(nested) => onChange({ ...settings, [key]: nested })}
+              />
+            </fieldset>
+          );
+        }
+
+        return (
+          <label key={key}>
+            <span>{settingLabel(key)}</span>
+            {typeof value === "boolean" ? (
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={(event) => onChange({ ...settings, [key]: event.target.checked })}
+              />
+            ) : (
+              <input
+                type={typeof value === "number" ? "number" : "text"}
+                step={typeof value === "number" ? "any" : undefined}
+                value={value}
+                onChange={(event) =>
+                  onChange({
+                    ...settings,
+                    [key]: typeof value === "number" ? Number(event.target.value) : event.target.value,
+                  })
+                }
+              />
+            )}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
 
 function App() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -17,6 +72,9 @@ function App() {
   const [calibMotorId, setCalibMotorId] = useState(0);
   const [calibTarget, setCalibTarget] = useState("0");
   const [calibError, setCalibError] = useState<string | null>(null);
+  const [settingsDocument, setSettingsDocument] = useState<SettingsResponse | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -35,12 +93,25 @@ function App() {
 
   useEffect(() => {
     api.configPath().then((r) => setConfigPath(r.config_path)).catch(() => setConfigPath(null));
+    api.settings().then(setSettingsDocument).catch((err) => setSettingsError((err as Error).message));
   }, []);
 
   const connect = async (simulation: boolean) => {
     setConnectError(null);
     try {
       await api.connect(simulation);
+      const currentSettings = await api.settings();
+      setSettingsDocument(currentSettings);
+      await refreshStatus();
+    } catch (err) {
+      setConnectError((err as Error).message);
+    }
+  };
+
+  const disconnect = async () => {
+    setConnectError(null);
+    try {
+      await api.disconnect();
       await refreshStatus();
     } catch (err) {
       setConnectError((err as Error).message);
@@ -117,6 +188,25 @@ function App() {
     }
   };
 
+  const saveSettings = async () => {
+    if (!settingsDocument) return;
+    setSettingsError(null);
+    setSettingsMessage(null);
+    try {
+      const result = await api.updateSettings(settingsDocument.settings);
+      setSettingsMessage(
+        result.reconnect_required
+          ? "Saved. Disconnect and reconnect to apply the serial port settings."
+          : result.reloaded
+            ? "Saved and reloaded."
+            : "Saved. The settings will load when you connect.",
+      );
+      await refreshStatus();
+    } catch (err) {
+      setSettingsError((err as Error).message);
+    }
+  };
+
   const busy = status?.state === "running" || status?.state === "awaiting_confirmation";
 
   return (
@@ -132,6 +222,20 @@ function App() {
             <button onClick={() => connect(true)}>Connect (simulation)</button>
           </div>
           {connectError && <p className="error">{connectError}</p>}
+        </section>
+      )}
+
+      {settingsDocument && (
+        <section className="card">
+          <h2>Machine settings</h2>
+          <p className="message">Changes are saved to {settingsDocument.config_path}.</p>
+          <SettingsFields
+            settings={settingsDocument.settings}
+            onChange={(settings) => setSettingsDocument({ ...settingsDocument, settings })}
+          />
+          <button disabled={busy} onClick={saveSettings}>Save and reload</button>
+          {settingsMessage && <p className="success">{settingsMessage}</p>}
+          {settingsError && <p className="error">{settingsError}</p>}
         </section>
       )}
 
@@ -154,6 +258,7 @@ function App() {
             </p>
             {status.message && <p className="message">{status.message}</p>}
             {status.error && <p className="error">{status.error}</p>}
+            <button disabled={busy} onClick={disconnect}>Disconnect</button>
           </section>
 
           <section className="card">

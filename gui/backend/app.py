@@ -17,12 +17,15 @@ import shutil
 import sys
 import threading
 import traceback
+import yaml
 from enum import Enum
 from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from src.schema import MachineConfig
+from src.utils import load_config
 from src.winding import Wind
 
 
@@ -86,6 +89,7 @@ class AppState:
     def __init__(self):
         self.lock = threading.Lock()
         self.wind: Optional[Wind] = None
+        self.config_path: Optional[str] = None
         self.op_state = OperationState.IDLE
         self.operation: Optional[str] = None
         self.pending_wire_idx: Optional[int] = None
@@ -142,6 +146,63 @@ def config_path():
     return {"config_path": _default_config_path()}
 
 
+def _active_config_path() -> str:
+    return state.config_path or _default_config_path()
+
+
+@app.get("/api/settings")
+def get_settings():
+    path = _active_config_path()
+    try:
+        config = load_config(path)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to load settings: {exc}"
+        ) from exc
+    return {
+        "config_path": path,
+        "settings": config.model_dump(),
+    }
+
+
+@app.put("/api/settings")
+def update_settings(body: MachineConfig):
+    path = _active_config_path()
+    with state.lock:
+        _require_idle()
+        try:
+            settings = body.model_dump()
+            serial_changed = bool(
+                state.wind is not None and body.serial != state.wind.config.serial
+            )
+            temporary_path = f"{path}.tmp"
+            with open(temporary_path, "w", encoding="utf-8") as settings_file:
+                yaml.safe_dump(settings, settings_file, sort_keys=False)
+            os.replace(temporary_path, path)
+
+            reloaded = state.wind is not None and not serial_changed
+            if reloaded:
+                state.wind.load_config(path)
+                state.message = "Settings saved and reloaded"
+            elif serial_changed:
+                state.message = "Settings saved; reconnect to apply serial changes"
+            else:
+                state.message = "Settings saved"
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(
+                status_code=400, detail=f"Failed to update settings: {exc}"
+            ) from exc
+
+    return {
+        "status": "updated",
+        "config_path": path,
+        "reloaded": reloaded,
+        "reconnect_required": serial_changed,
+    }
+
+
 @app.post("/api/connect")
 def connect(body: ConnectRequest):
     with state.lock:
@@ -156,6 +217,7 @@ def connect(body: ConnectRequest):
         ) from exc
     with state.lock:
         state.wind = wind
+        state.config_path = config_path
         state.op_state = OperationState.IDLE
         state.message = "Connected"
     return {

@@ -167,10 +167,12 @@ def get_settings():
 
 @app.put("/api/settings")
 def update_settings(body: MachineConfig):
-    path = _active_config_path()
+    path = os.path.realpath(_active_config_path())
+    allowed_root = os.path.realpath(_user_config_dir()) + os.sep
+    if not path.startswith(allowed_root):
+        raise HTTPException(status_code=400, detail="Invalid settings path")
     with state.lock:
         _require_idle()
-        try:
             settings = body.model_dump()
             serial_changed = bool(
                 state.wind is not None and body.serial != state.wind.config.serial

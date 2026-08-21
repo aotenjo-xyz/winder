@@ -96,6 +96,10 @@ button:disabled {
   gap: 0.35rem;
 }
 
+.settings-fields .setting-wide {
+  grid-column: 1 / -1;
+}
+
 .settings-fields input:not([type="checkbox"]) {
   padding: 0.5rem;
 }

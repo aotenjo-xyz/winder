@@ -35,7 +35,7 @@ function SettingsFields({
         }
 
         return (
-          <label key={key}>
+          <label key={key} className={key === "winding_config" ? "setting-wide" : undefined}>
             <span>{settingLabel(key)}</span>
             {typeof value === "boolean" ? (
               <input

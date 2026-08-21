@@ -3,10 +3,75 @@
   color-scheme: light dark;
 }
 
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  width: 190px;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid rgba(128, 128, 128, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.app-name {
+  margin: 0 0 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sidebar nav button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border-color: transparent;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: rgba(100, 108, 255, 0.14);
+  border-color: rgba(100, 108, 255, 0.35);
+}
+
+.connection-state {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+.connection-state::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: #888;
+}
+
+.connection-state.connected::before {
+  background: #198754;
+}
+
 .container {
-  max-width: 720px;
+  width: 100%;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  box-sizing: border-box;
 }
 
 .card {
@@ -136,4 +201,39 @@ button:disabled {
   padding: 1.5rem;
   border-radius: 8px;
   max-width: 400px;
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: sticky;
+    z-index: 10;
+    width: 100%;
+    height: auto;
+    padding: 0.75rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+    background: Canvas;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .app-name {
+    display: none;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+  }
+
+  .sidebar nav button {
+    width: auto;
+  }
+
+  .container {
+    padding-top: 1.25rem;
+  }
 }

@@ -64,6 +64,7 @@ function SettingsFields({
 }
 
 function App() {
+  const [activeView, setActiveView] = useState<"winding" | "settings">("winding");
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [configPath, setConfigPath] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
@@ -210,10 +211,34 @@ function App() {
   const busy = status?.state === "running" || status?.state === "awaiting_confirmation";
 
   return (
-    <main className="container">
-      <h1>Winder Control</h1>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div>
+          <p className="app-name">Winder Control</p>
+          <nav aria-label="Main navigation">
+            <button
+              className={activeView === "winding" ? "active" : undefined}
+              onClick={() => setActiveView("winding")}
+            >
+              Winding
+            </button>
+            <button
+              className={activeView === "settings" ? "active" : undefined}
+              onClick={() => setActiveView("settings")}
+            >
+              Settings
+            </button>
+          </nav>
+        </div>
+        <p className={`connection-state ${status?.connected ? "connected" : ""}`}>
+          {status?.connected ? "Machine connected" : "Not connected"}
+        </p>
+      </aside>
 
-      {!status?.connected && (
+      <main className="container">
+      <h1>{activeView === "winding" ? "Winding" : "Settings"}</h1>
+
+      {activeView === "winding" && !status?.connected && (
         <section className="card">
           <h2>Connect to machine</h2>
           {configPath && <p className="message">Settings file: {configPath}</p>}
@@ -225,7 +250,7 @@ function App() {
         </section>
       )}
 
-      {settingsDocument && (
+      {activeView === "settings" && settingsDocument && (
         <section className="card">
           <h2>Machine settings</h2>
           <p className="message">Changes are saved to {settingsDocument.config_path}.</p>
@@ -239,7 +264,13 @@ function App() {
         </section>
       )}
 
-      {status?.connected && (
+      {activeView === "settings" && !settingsDocument && settingsError && (
+        <section className="card">
+          <p className="error">{settingsError}</p>
+        </section>
+      )}
+
+      {activeView === "winding" && status?.connected && (
         <>
           <section className="card">
             <h2>Motor positions</h2>
@@ -328,7 +359,8 @@ function App() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 }
 

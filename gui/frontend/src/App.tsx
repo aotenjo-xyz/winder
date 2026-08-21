@@ -286,6 +286,20 @@ function App() {
     }
   };
 
+  const clearSettingsChanges = async () => {
+    setSettingsError(null);
+    setSettingsMessage(null);
+    try {
+      const savedSettings = await api.settings();
+      setSettingsDocument(savedSettings);
+      setInvalidNumericFields(new Set());
+      setSettingsRevision((revision) => revision + 1);
+      setSettingsMessage("Unsaved changes cleared.");
+    } catch (err) {
+      setSettingsError((err as Error).message);
+    }
+  };
+
   const busy = status?.state === "running" || status?.state === "awaiting_confirmation";
 
   return (
@@ -348,9 +362,14 @@ function App() {
           {invalidNumericFields.size > 0 && (
             <p className="error">Complete all numeric fields with valid numbers before saving.</p>
           )}
-          <button disabled={busy || invalidNumericFields.size > 0} onClick={saveSettings}>
-            Save and reload
-          </button>
+          <div className="row">
+            <button disabled={busy || invalidNumericFields.size > 0} onClick={saveSettings}>
+              Save and reload
+            </button>
+            <button className="secondary" disabled={busy} onClick={clearSettingsChanges}>
+              Clear changes
+            </button>
+          </div>
           {settingsMessage && <p className="success">{settingsMessage}</p>}
           {settingsError && <p className="error">{settingsError}</p>}
         </section>

@@ -134,6 +134,17 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+button.secondary {
+  border-color: rgba(128, 128, 128, 0.55);
+  background: transparent;
+  color: inherit;
+}
+
+button.secondary:hover:not(:disabled) {
+  border-color: rgba(82, 116, 220, 0.75);
+  background: rgba(82, 116, 220, 0.12);
+}
+
 button:disabled {
   border-color: var(--button-disabled-border);
   background: var(--button-disabled-bg);

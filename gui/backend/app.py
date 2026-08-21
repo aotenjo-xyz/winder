@@ -182,10 +182,9 @@ def update_settings(body: MachineConfig):
                 yaml.safe_dump(settings, settings_file, sort_keys=False)
             os.replace(temporary_path, path)
 
-            reloaded = state.wind is not None and not serial_changed
-            if reloaded:
-                state.wind.load_config(path)
-                state.message = "Settings saved and reloaded"
+            reloaded = False
+            if state.wind is not None and not serial_changed:
+                state.message = "Settings saved; reconnect to apply changes"
             elif serial_changed:
                 state.message = "Settings saved; reconnect to apply serial changes"
             else:

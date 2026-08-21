@@ -211,6 +211,11 @@ button:disabled {
   padding: 0.5rem;
 }
 
+.settings-fields input[aria-invalid="true"] {
+  border-color: #d33;
+  outline-color: #d33;
+}
+
 .settings-fields input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;

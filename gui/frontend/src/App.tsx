@@ -12,16 +12,57 @@ function settingLabel(key: string) {
   return key.replace(/_/g, " ").replace(/\b\w/g, (character: string) => character.toUpperCase());
 }
 
+function NumericSettingInput({
+  value,
+  fieldPath,
+  onChange,
+  onValidityChange,
+}: {
+  value: number;
+  fieldPath: string;
+  onChange: (value: number) => void;
+  onValidityChange: (fieldPath: string, valid: boolean) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  const [valid, setValid] = useState(true);
+
+  const updateDraft = (nextDraft: string) => {
+    setDraft(nextDraft);
+    const parsed = Number(nextDraft);
+    const isValid = nextDraft.trim() !== "" && Number.isFinite(parsed);
+    setValid(isValid);
+    onValidityChange(fieldPath, isValid);
+    if (isValid) onChange(parsed);
+  };
+
+  return (
+    <input
+      type="number"
+      step="any"
+      value={draft}
+      aria-invalid={!valid}
+      onChange={(event) => updateDraft(event.target.value)}
+    />
+  );
+}
+
 function SettingsFields({
   settings,
   onChange,
+  onNumericValidityChange,
+  path = "",
+  revision,
 }: {
   settings: Record<string, SettingValue>;
   onChange: (settings: Record<string, SettingValue>) => void;
+  onNumericValidityChange: (fieldPath: string, valid: boolean) => void;
+  path?: string;
+  revision: number;
 }) {
   return (
     <div className="settings-fields">
       {Object.entries(settings).map(([key, value]) => {
+        const fieldPath = path ? `${path}.${key}` : key;
         if (typeof value === "object") {
           return (
             <fieldset key={key}>
@@ -29,6 +70,9 @@ function SettingsFields({
               <SettingsFields
                 settings={value}
                 onChange={(nested) => onChange({ ...settings, [key]: nested })}
+                onNumericValidityChange={onNumericValidityChange}
+                path={fieldPath}
+                revision={revision}
               />
             </fieldset>
           );
@@ -43,17 +87,19 @@ function SettingsFields({
                 checked={value}
                 onChange={(event) => onChange({ ...settings, [key]: event.target.checked })}
               />
+            ) : typeof value === "number" ? (
+              <NumericSettingInput
+                key={`${fieldPath}-${revision}`}
+                value={value}
+                fieldPath={fieldPath}
+                onChange={(number) => onChange({ ...settings, [key]: number })}
+                onValidityChange={onNumericValidityChange}
+              />
             ) : (
               <input
-                type={typeof value === "number" ? "number" : "text"}
-                step={typeof value === "number" ? "any" : undefined}
+                type="text"
                 value={value}
-                onChange={(event) =>
-                  onChange({
-                    ...settings,
-                    [key]: typeof value === "number" ? Number(event.target.value) : event.target.value,
-                  })
-                }
+                onChange={(event) => onChange({ ...settings, [key]: event.target.value })}
               />
             )}
           </label>
@@ -76,6 +122,8 @@ function App() {
   const [settingsDocument, setSettingsDocument] = useState<SettingsResponse | null>(null);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
+  const [invalidNumericFields, setInvalidNumericFields] = useState<Set<string>>(new Set());
+  const [settingsRevision, setSettingsRevision] = useState(0);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -94,8 +142,18 @@ function App() {
 
   useEffect(() => {
     api.configPath().then((r) => setConfigPath(r.config_path)).catch(() => setConfigPath(null));
-    api.settings().then(setSettingsDocument).catch((err) => setSettingsError((err as Error).message));
+    api.settings()
+      .then((settings) => {
+        setSettingsDocument(settings);
+        setInvalidNumericFields(new Set());
+        setSettingsRevision((revision) => revision + 1);
+      })
+      .catch((err) => setSettingsError((err as Error).message));
   }, []);
+
+  useEffect(() => {
+    if (activeView !== "settings") setInvalidNumericFields(new Set());
+  }, [activeView]);
 
   const connect = async (simulation: boolean) => {
     setConnectError(null);
@@ -103,6 +161,8 @@ function App() {
       await api.connect(simulation);
       const currentSettings = await api.settings();
       setSettingsDocument(currentSettings);
+      setInvalidNumericFields(new Set());
+      setSettingsRevision((revision) => revision + 1);
       await refreshStatus();
     } catch (err) {
       setConnectError((err as Error).message);
@@ -175,8 +235,12 @@ function App() {
 
   const moveMotor = async () => {
     setCalibError(null);
+    if (calibTarget.trim() === "") {
+      setCalibError("Enter a valid number");
+      return;
+    }
     const target = Number(calibTarget);
-    if (Number.isNaN(target)) {
+    if (!Number.isFinite(target)) {
       setCalibError("Enter a valid number");
       return;
     }
@@ -203,6 +267,10 @@ function App() {
     if (!settingsDocument) return;
     setSettingsError(null);
     setSettingsMessage(null);
+    if (invalidNumericFields.size > 0) {
+      setSettingsError("Complete all numeric fields with valid numbers before saving.");
+      return;
+    }
     try {
       const result = await api.updateSettings(settingsDocument.settings);
       setSettingsMessage(
@@ -267,8 +335,22 @@ function App() {
           <SettingsFields
             settings={settingsDocument.settings}
             onChange={(settings) => setSettingsDocument({ ...settingsDocument, settings })}
+            onNumericValidityChange={(fieldPath, valid) =>
+              setInvalidNumericFields((current) => {
+                const next = new Set(current);
+                if (valid) next.delete(fieldPath);
+                else next.add(fieldPath);
+                return next;
+              })
+            }
+            revision={settingsRevision}
           />
-          <button disabled={busy} onClick={saveSettings}>Save and reload</button>
+          {invalidNumericFields.size > 0 && (
+            <p className="error">Complete all numeric fields with valid numbers before saving.</p>
+          )}
+          <button disabled={busy || invalidNumericFields.size > 0} onClick={saveSettings}>
+            Save and reload
+          </button>
           {settingsMessage && <p className="success">{settingsMessage}</p>}
           {settingsError && <p className="error">{settingsError}</p>}
         </section>

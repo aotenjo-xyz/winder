@@ -1,12 +1,96 @@
 :root {
   font-family: system-ui, sans-serif;
   color-scheme: light dark;
+  --button-bg: #3157c8;
+  --button-bg-hover: #2447ad;
+  --button-border: #2447ad;
+  --button-text: #fff;
+  --button-disabled-bg: #d5d8df;
+  --button-disabled-border: #c5c9d1;
+  --button-disabled-text: #686d78;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --button-bg: #5274dc;
+    --button-bg-hover: #6a88e5;
+    --button-border: #7892e3;
+    --button-disabled-bg: #3d414a;
+    --button-disabled-border: #4b505b;
+    --button-disabled-text: #9da3af;
+  }
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  width: 190px;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid rgba(128, 128, 128, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.app-name {
+  margin: 0 0 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sidebar nav button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border-color: transparent;
+  color: inherit;
+}
+
+.sidebar nav button:hover,
+.sidebar nav button.active {
+  background: rgba(100, 108, 255, 0.14);
+  border-color: rgba(100, 108, 255, 0.35);
+}
+
+.connection-state {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+.connection-state::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: #888;
+}
+
+.connection-state.connected::before {
+  background: #198754;
 }
 
 .container {
-  max-width: 720px;
+  width: 100%;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  box-sizing: border-box;
 }
 
 .card {
@@ -22,15 +106,49 @@
   flex-wrap: wrap;
 }
 
+.calibration-actions {
+  margin-top: 0.9rem;
+}
+
 button {
   padding: 0.6rem 1rem;
   border-radius: 6px;
-  border: 1px solid rgba(128, 128, 128, 0.4);
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--button-bg-hover);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 3px solid rgba(82, 116, 220, 0.35);
+  outline-offset: 2px;
+}
+
+button.secondary {
+  border-color: rgba(128, 128, 128, 0.55);
+  background: transparent;
+  color: inherit;
+}
+
+button.secondary:hover:not(:disabled) {
+  border-color: rgba(82, 116, 220, 0.75);
+  background: rgba(82, 116, 220, 0.12);
 }
 
 button:disabled {
-  opacity: 0.5;
+  border-color: var(--button-disabled-border);
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
   cursor: not-allowed;
 }
 
@@ -68,16 +186,68 @@ button:disabled {
   color: #d33;
 }
 
+.success {
+  color: #198754;
+}
+
+.settings-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.settings-fields fieldset {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.settings-fields legend {
+  font-weight: 600;
+}
+
+.settings-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.settings-fields .setting-wide {
+  grid-column: 1 / -1;
+}
+
+.settings-fields input:not([type="checkbox"]) {
+  padding: 0.5rem;
+}
+
+.settings-fields input[aria-invalid="true"] {
+  border-color: #d33;
+  outline-color: #d33;
+}
+
+.settings-fields input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
 .danger {
   text-align: center;
 }
 
 .estop {
   background: #d33;
+  border-color: #b52222;
   color: white;
   font-weight: bold;
   padding: 1rem 2rem;
   font-size: 1.1rem;
+}
+
+.estop:hover:not(:disabled) {
+  background: #b52222;
+  border-color: #971b1b;
 }
 
 .modal-backdrop {
@@ -95,4 +265,39 @@ button:disabled {
   padding: 1.5rem;
   border-radius: 8px;
   max-width: 400px;
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: sticky;
+    z-index: 10;
+    width: 100%;
+    height: auto;
+    padding: 0.75rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+    background: Canvas;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .app-name {
+    display: none;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+  }
+
+  .sidebar nav button {
+    width: auto;
+  }
+
+  .container {
+    padding-top: 1.25rem;
+  }
 }

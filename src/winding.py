@@ -45,18 +45,19 @@ class Wind:
         self.serial_lock = threading.RLock()
         self.motor_positions = [0, 0, 0, 0]
         self.motor2_pos = Motor2State.TOP
-        self.config = load_config(config_path)
-        self.simulation = simulation
-        self.motor_velocities = [
-            self.config.motor.M0.velocity,
-            self.config.motor.M1.velocity,
-            self.config.motor.M2.velocity,
-            self.config.motor.M3.velocity,
-        ]
+        self.load_config(config_path)
+        self.logger = init_logger(self.config)
+        self.load_settings_from_config(simulation, turns)
         self.motor_positions_in_simulation = [
             MotorPosition(motor_id=i, position=0.0, timestamp=datetime.now())
             for i in range(4)
         ]
+
+    def load_config(self, config_path):
+        self.config = load_config(config_path)
+
+    def load_settings_from_config(self, simulation=False, turns=None):
+        self.simulation = simulation
         if not simulation:
             baudrate = self.config.serial.baudrate
             port = self.config.serial.port
@@ -67,9 +68,12 @@ class Wind:
             for i in range(4):
                 update_motor_position(self.conn, i, 0.0)
                 update_motor_target(self.conn, i, 0.0)
-
-        self.logger = init_logger(self.config)
-
+        self.motor_velocities = [
+            self.config.motor.M0.velocity,
+            self.config.motor.M1.velocity,
+            self.config.motor.M2.velocity,
+            self.config.motor.M3.velocity,
+        ]
         self.turns = turns if turns is not None else self.config.winding.turns
         self.winding_config = self.config.winding.winding_config
         self.teeth_count = len(self.winding_config)

@@ -27,8 +27,6 @@ class ColorFormatter(logging.Formatter):
 
 def init_logger(config: MachineConfig):
     logger = logging.getLogger("Wind")
-    logging_level_name = None
-
     logging_level_name = config.logging.level
 
     # Environment variable overrides config to make temporary runtime changes easy.

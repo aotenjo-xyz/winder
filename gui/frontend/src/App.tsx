@@ -189,6 +189,16 @@ function App() {
     }
   };
 
+  const runCalibrationAction = async (action: () => Promise<{ status: string }>) => {
+    setCalibError(null);
+    try {
+      await action();
+      await refreshStatus();
+    } catch (err) {
+      setCalibError((err as Error).message);
+    }
+  };
+
   const saveSettings = async () => {
     if (!settingsDocument) return;
     setSettingsError(null);
@@ -335,6 +345,20 @@ function App() {
               />
               <button disabled={busy} onClick={moveMotor}>
                 Move
+              </button>
+            </div>
+            <div className="row calibration-actions">
+              <button
+                disabled={busy}
+                onClick={() => runCalibrationAction(api.moveToInitialPosition)}
+              >
+                Move to initial position
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => runCalibrationAction(api.moveToZeroPosition)}
+              >
+                Move to zero position
               </button>
             </div>
             {calibError && <p className="error">{calibError}</p>}

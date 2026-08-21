@@ -82,5 +82,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ target }),
     }),
+  moveToInitialPosition: () =>
+    request<{ status: string }>("/api/calibration/initial-position", { method: "POST" }),
+  moveToZeroPosition: () =>
+    request<{ status: string }>("/api/calibration/zero-position", { method: "POST" }),
   resetState: () => request<{ status: string }>("/api/state/reset", { method: "POST" }),
 };

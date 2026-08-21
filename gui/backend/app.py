@@ -290,11 +290,12 @@ def wind_precheck(wire_idx: int):
 
 
 def _run_in_background(target_fn, operation_name):
+    with state.lock:
+        state.op_state = OperationState.RUNNING
+        state.operation = operation_name
+        state.error = None
+
     def _runner():
-        with state.lock:
-            state.op_state = OperationState.RUNNING
-            state.operation = operation_name
-            state.error = None
         try:
             target_fn()
             with state.lock:
@@ -384,6 +385,24 @@ def move_motor(motor_id: int, body: MoveMotorRequest):
         _require_idle()
     wind.move_motor(motor_id, body.target)
     return {"status": "ok"}
+
+
+@app.post("/api/calibration/initial-position")
+def move_to_initial_position():
+    wind = _get_wind()
+    with state.lock:
+        _require_idle()
+    _run_in_background(wind.init_position, "move_to_initial_position")
+    return {"status": "started"}
+
+
+@app.post("/api/calibration/zero-position")
+def move_to_zero_position():
+    wind = _get_wind()
+    with state.lock:
+        _require_idle()
+    _run_in_background(wind.back_to_zero, "move_to_zero_position")
+    return {"status": "started"}
 
 
 @app.post("/api/state/reset")

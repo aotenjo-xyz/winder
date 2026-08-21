@@ -7,9 +7,10 @@ cd "$(dirname "$0")/../.."  # repo root
 
 TARGET_TRIPLE="$(rustc --print host-tuple)"
 OUT_DIR="gui/frontend/src-tauri/binaries"
+BUILD_DIR="$(pwd)/.pyinstaller-build"
 BIN_NAME="winder-backend"
 
-mkdir -p "$OUT_DIR"
+mkdir -p "$OUT_DIR" "$BUILD_DIR"
 
 ADD_DATA_SEP=":"
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
@@ -21,8 +22,8 @@ pyinstaller \
   --onefile \
   --add-data "$(pwd)/settings-example.yml${ADD_DATA_SEP}." \
   --distpath "$OUT_DIR" \
-  --workpath /tmp/winder-backend-build \
-  --specpath /tmp/winder-backend-build \
+  --workpath "$BUILD_DIR" \
+  --specpath "$BUILD_DIR" \
   gui/backend/app.py
 
 EXT=""

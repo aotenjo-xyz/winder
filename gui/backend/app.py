@@ -173,6 +173,7 @@ def update_settings(body: MachineConfig):
         raise HTTPException(status_code=400, detail="Invalid settings path")
     with state.lock:
         _require_idle()
+        try:
             settings = body.model_dump()
             serial_changed = bool(
                 state.wind is not None and body.serial != state.wind.config.serial

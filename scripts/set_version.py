@@ -131,11 +131,11 @@ def main() -> None:
     except (KeyError, OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
-changed = [
-    path
-    for path, content in updates.items()
-    if path.read_text(encoding="utf-8") != content
-]
+    changed = [
+        path
+        for path, content in updates.items()
+        if path.read_text(encoding="utf-8") != content
+    ]
     action = "Would update" if args.dry_run else "Updated"
     if not args.dry_run:
         for path in changed:

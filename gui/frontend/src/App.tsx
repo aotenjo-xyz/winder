@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { api, StatusResponse } from "./api";
+import { api, SettingValue, SettingsResponse, StatusResponse } from "./api";
 import "./App.css";
 
 type PendingConfirmation = {
@@ -8,7 +8,109 @@ type PendingConfirmation = {
   message: string;
 };
 
+function settingLabel(key: string) {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (character: string) => character.toUpperCase());
+}
+
+function NumericSettingInput({
+  value,
+  fieldPath,
+  onChange,
+  onValidityChange,
+}: {
+  value: number;
+  fieldPath: string;
+  onChange: (value: number) => void;
+  onValidityChange: (fieldPath: string, valid: boolean) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  const [valid, setValid] = useState(true);
+
+  const updateDraft = (nextDraft: string) => {
+    setDraft(nextDraft);
+    const parsed = Number(nextDraft);
+    const isValid = nextDraft.trim() !== "" && Number.isFinite(parsed);
+    setValid(isValid);
+    onValidityChange(fieldPath, isValid);
+    if (isValid) onChange(parsed);
+  };
+
+  return (
+    <input
+      type="number"
+      step="any"
+      value={draft}
+      aria-invalid={!valid}
+      onChange={(event) => updateDraft(event.target.value)}
+    />
+  );
+}
+
+function SettingsFields({
+  settings,
+  onChange,
+  onNumericValidityChange,
+  path = "",
+  revision,
+}: {
+  settings: Record<string, SettingValue>;
+  onChange: (settings: Record<string, SettingValue>) => void;
+  onNumericValidityChange: (fieldPath: string, valid: boolean) => void;
+  path?: string;
+  revision: number;
+}) {
+  return (
+    <div className="settings-fields">
+      {Object.entries(settings).map(([key, value]) => {
+        const fieldPath = path ? `${path}.${key}` : key;
+        if (typeof value === "object") {
+          return (
+            <fieldset key={key}>
+              <legend>{settingLabel(key)}</legend>
+              <SettingsFields
+                settings={value}
+                onChange={(nested) => onChange({ ...settings, [key]: nested })}
+                onNumericValidityChange={onNumericValidityChange}
+                path={fieldPath}
+                revision={revision}
+              />
+            </fieldset>
+          );
+        }
+
+        return (
+          <label key={key} className={key === "winding_config" ? "setting-wide" : undefined}>
+            <span>{settingLabel(key)}</span>
+            {typeof value === "boolean" ? (
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={(event) => onChange({ ...settings, [key]: event.target.checked })}
+              />
+            ) : typeof value === "number" ? (
+              <NumericSettingInput
+                key={`${fieldPath}-${revision}`}
+                value={value}
+                fieldPath={fieldPath}
+                onChange={(number) => onChange({ ...settings, [key]: number })}
+                onValidityChange={onNumericValidityChange}
+              />
+            ) : (
+              <input
+                type="text"
+                value={value}
+                onChange={(event) => onChange({ ...settings, [key]: event.target.value })}
+              />
+            )}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 function App() {
+  const [activeView, setActiveView] = useState<"winding" | "settings">("winding");
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [configPath, setConfigPath] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
@@ -17,6 +119,11 @@ function App() {
   const [calibMotorId, setCalibMotorId] = useState(0);
   const [calibTarget, setCalibTarget] = useState("0");
   const [calibError, setCalibError] = useState<string | null>(null);
+  const [settingsDocument, setSettingsDocument] = useState<SettingsResponse | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
+  const [invalidNumericFields, setInvalidNumericFields] = useState<Set<string>>(new Set());
+  const [settingsRevision, setSettingsRevision] = useState(0);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -35,12 +142,37 @@ function App() {
 
   useEffect(() => {
     api.configPath().then((r) => setConfigPath(r.config_path)).catch(() => setConfigPath(null));
+    api.settings()
+      .then((settings) => {
+        setSettingsDocument(settings);
+        setInvalidNumericFields(new Set());
+        setSettingsRevision((revision) => revision + 1);
+      })
+      .catch((err) => setSettingsError((err as Error).message));
   }, []);
+
+  useEffect(() => {
+    if (activeView !== "settings") setInvalidNumericFields(new Set());
+  }, [activeView]);
 
   const connect = async (simulation: boolean) => {
     setConnectError(null);
     try {
       await api.connect(simulation);
+      const currentSettings = await api.settings();
+      setSettingsDocument(currentSettings);
+      setInvalidNumericFields(new Set());
+      setSettingsRevision((revision) => revision + 1);
+      await refreshStatus();
+    } catch (err) {
+      setConnectError((err as Error).message);
+    }
+  };
+
+  const disconnect = async () => {
+    setConnectError(null);
+    try {
+      await api.disconnect();
       await refreshStatus();
     } catch (err) {
       setConnectError((err as Error).message);
@@ -103,8 +235,12 @@ function App() {
 
   const moveMotor = async () => {
     setCalibError(null);
+    if (calibTarget.trim() === "") {
+      setCalibError("Enter a valid number");
+      return;
+    }
     const target = Number(calibTarget);
-    if (Number.isNaN(target)) {
+    if (!Number.isFinite(target)) {
       setCalibError("Enter a valid number");
       return;
     }
@@ -117,13 +253,84 @@ function App() {
     }
   };
 
+  const runCalibrationAction = async (action: () => Promise<{ status: string }>) => {
+    setCalibError(null);
+    try {
+      await action();
+      await refreshStatus();
+    } catch (err) {
+      setCalibError((err as Error).message);
+    }
+  };
+
+  const saveSettings = async () => {
+    if (!settingsDocument) return;
+    setSettingsError(null);
+    setSettingsMessage(null);
+    if (invalidNumericFields.size > 0) {
+      setSettingsError("Complete all numeric fields with valid numbers before saving.");
+      return;
+    }
+    try {
+      const result = await api.updateSettings(settingsDocument.settings);
+      setSettingsMessage(
+        result.reconnect_required
+          ? "Saved. Disconnect and reconnect to apply the serial port settings."
+          : result.reloaded
+            ? "Saved and reloaded."
+            : "Saved. The settings will load when you connect.",
+      );
+      await refreshStatus();
+    } catch (err) {
+      setSettingsError((err as Error).message);
+    }
+  };
+
+  const clearSettingsChanges = async () => {
+    setSettingsError(null);
+    setSettingsMessage(null);
+    try {
+      const savedSettings = await api.settings();
+      setSettingsDocument(savedSettings);
+      setInvalidNumericFields(new Set());
+      setSettingsRevision((revision) => revision + 1);
+      setSettingsMessage("Unsaved changes cleared.");
+    } catch (err) {
+      setSettingsError((err as Error).message);
+    }
+  };
+
   const busy = status?.state === "running" || status?.state === "awaiting_confirmation";
 
   return (
-    <main className="container">
-      <h1>Winder Control</h1>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div>
+          <p className="app-name">Winder Control</p>
+          <nav aria-label="Main navigation">
+            <button
+              className={activeView === "winding" ? "active" : undefined}
+              onClick={() => setActiveView("winding")}
+            >
+              Winding
+            </button>
+            <button
+              className={activeView === "settings" ? "active" : undefined}
+              onClick={() => setActiveView("settings")}
+            >
+              Settings
+            </button>
+          </nav>
+        </div>
+        <p className={`connection-state ${status?.connected ? "connected" : ""}`}>
+          {status?.connected ? "Machine connected" : "Not connected"}
+        </p>
+      </aside>
 
-      {!status?.connected && (
+      <main className="container">
+      <h1>{activeView === "winding" ? "Winding" : "Settings"}</h1>
+
+      {activeView === "winding" && !status?.connected && (
         <section className="card">
           <h2>Connect to machine</h2>
           {configPath && <p className="message">Settings file: {configPath}</p>}
@@ -135,7 +342,46 @@ function App() {
         </section>
       )}
 
-      {status?.connected && (
+      {activeView === "settings" && settingsDocument && (
+        <section className="card">
+          <h2>Machine settings</h2>
+          <p className="message">Changes are saved to {settingsDocument.config_path}.</p>
+          <SettingsFields
+            settings={settingsDocument.settings}
+            onChange={(settings) => setSettingsDocument({ ...settingsDocument, settings })}
+            onNumericValidityChange={(fieldPath, valid) =>
+              setInvalidNumericFields((current) => {
+                const next = new Set(current);
+                if (valid) next.delete(fieldPath);
+                else next.add(fieldPath);
+                return next;
+              })
+            }
+            revision={settingsRevision}
+          />
+          {invalidNumericFields.size > 0 && (
+            <p className="error">Complete all numeric fields with valid numbers before saving.</p>
+          )}
+          <div className="row">
+            <button disabled={busy || invalidNumericFields.size > 0} onClick={saveSettings}>
+              Save and reload
+            </button>
+            <button className="secondary" disabled={busy} onClick={clearSettingsChanges}>
+              Clear changes
+            </button>
+          </div>
+          {settingsMessage && <p className="success">{settingsMessage}</p>}
+          {settingsError && <p className="error">{settingsError}</p>}
+        </section>
+      )}
+
+      {activeView === "settings" && !settingsDocument && settingsError && (
+        <section className="card">
+          <p className="error">{settingsError}</p>
+        </section>
+      )}
+
+      {activeView === "winding" && status?.connected && (
         <>
           <section className="card">
             <h2>Motor positions</h2>
@@ -154,6 +400,7 @@ function App() {
             </p>
             {status.message && <p className="message">{status.message}</p>}
             {status.error && <p className="error">{status.error}</p>}
+            <button disabled={busy} onClick={disconnect}>Disconnect</button>
           </section>
 
           <section className="card">
@@ -201,6 +448,20 @@ function App() {
                 Move
               </button>
             </div>
+            <div className="row calibration-actions">
+              <button
+                disabled={busy}
+                onClick={() => runCalibrationAction(api.moveToInitialPosition)}
+              >
+                Move to initial position
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => runCalibrationAction(api.moveToZeroPosition)}
+              >
+                Move to zero position
+              </button>
+            </div>
             {calibError && <p className="error">{calibError}</p>}
           </section>
 
@@ -223,7 +484,8 @@ function App() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 }
 

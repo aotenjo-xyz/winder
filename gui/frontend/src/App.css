@@ -1,6 +1,24 @@
 :root {
   font-family: system-ui, sans-serif;
   color-scheme: light dark;
+  --button-bg: #3157c8;
+  --button-bg-hover: #2447ad;
+  --button-border: #2447ad;
+  --button-text: #fff;
+  --button-disabled-bg: #d5d8df;
+  --button-disabled-border: #c5c9d1;
+  --button-disabled-text: #686d78;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --button-bg: #5274dc;
+    --button-bg-hover: #6a88e5;
+    --button-border: #7892e3;
+    --button-disabled-bg: #3d414a;
+    --button-disabled-border: #4b505b;
+    --button-disabled-text: #9da3af;
+  }
 }
 
 .app-shell {
@@ -38,6 +56,7 @@
   text-align: left;
   background: transparent;
   border-color: transparent;
+  color: inherit;
 }
 
 .sidebar nav button:hover,
@@ -90,12 +109,31 @@
 button {
   padding: 0.6rem 1rem;
   border-radius: 6px;
-  border: 1px solid rgba(128, 128, 128, 0.4);
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--button-bg-hover);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 3px solid rgba(82, 116, 220, 0.35);
+  outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.5;
+  border-color: var(--button-disabled-border);
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
   cursor: not-allowed;
 }
 
@@ -180,10 +218,16 @@ button:disabled {
 
 .estop {
   background: #d33;
+  border-color: #b52222;
   color: white;
   font-weight: bold;
   padding: 1rem 2rem;
   font-size: 1.1rem;
+}
+
+.estop:hover:not(:disabled) {
+  background: #b52222;
+  border-color: #971b1b;
 }
 
 .modal-backdrop {

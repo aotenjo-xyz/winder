@@ -12,15 +12,10 @@ BIN_NAME="winder-backend"
 
 mkdir -p "$OUT_DIR" "$BUILD_DIR"
 
-ADD_DATA_SEP=":"
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-  ADD_DATA_SEP=";"
-fi
-
 pyinstaller \
   --name "$BIN_NAME" \
   --onefile \
-  --add-data "$(pwd)/settings-example.yml${ADD_DATA_SEP}." \
+  --add-data "../settings-example.yml:." \
   --distpath "$OUT_DIR" \
   --workpath "$BUILD_DIR" \
   --specpath "$BUILD_DIR" \
@@ -31,5 +26,7 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
   EXT=".exe"
 fi
 
-mv "$OUT_DIR/$BIN_NAME$EXT" "$OUT_DIR/$BIN_NAME-$TARGET_TRIPLE$EXT"
-echo "Built $OUT_DIR/$BIN_NAME-$TARGET_TRIPLE$EXT"
+SIDECAR_PATH="$OUT_DIR/$BIN_NAME-$TARGET_TRIPLE$EXT"
+mv "$OUT_DIR/$BIN_NAME$EXT" "$SIDECAR_PATH"
+"$SIDECAR_PATH" --check-bundle
+echo "Built $SIDECAR_PATH"

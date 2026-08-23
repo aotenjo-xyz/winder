@@ -114,6 +114,8 @@ app.add_middleware(
     # The Tauri WebView is the only client of this localhost-only service.
     allow_origins=[
         "tauri://localhost",
+        "http://tauri.localhost",
+        "https://tauri.localhost",
         "http://localhost:1420",
         "http://127.0.0.1:1420",
     ],
@@ -419,6 +421,13 @@ def reset_state():
 
 
 if __name__ == "__main__":
+    if "--check-bundle" in sys.argv:
+        bundled_settings = _bundled_example_config_path()
+        if not os.path.isfile(bundled_settings):
+            raise SystemExit(f"Bundled settings file is missing: {bundled_settings}")
+        print(f"Bundled settings file found: {bundled_settings}")
+        raise SystemExit(0)
+
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8760)

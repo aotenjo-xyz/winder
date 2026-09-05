@@ -1,6 +1,6 @@
 [project]
 name = "winder"
-version = "1.0.0a4"
+version = "1.0.0a5"
 description = "Control software for the Aotenjo BLDC motor winding machine"
 readme = "README.md"
 requires-python = ">=3.12"

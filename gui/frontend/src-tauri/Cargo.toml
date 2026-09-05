@@ -1,6 +1,6 @@
 [package]
 name = "winder-gui"
-version = "1.0.0-alpha.4"
+version = "1.0.0-alpha.5"
 description = "Desktop GUI for the Aotenjo winding machine"
 edition = "2021"
 

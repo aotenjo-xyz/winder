@@ -21,7 +21,7 @@ class Motor0Config(BaseModel):
     vD: float
     pP: float
     voltage_limit: float
-    velocirty_limit: float
+    velocity_limit: float
     lpfTf: float
 
 
@@ -35,7 +35,7 @@ class Motor1Config(BaseModel):
     vD: float
     pP: float
     voltage_limit: float
-    velocirty_limit: float
+    velocity_limit: float
     lpfTf: float
 
 
@@ -49,7 +49,7 @@ class Motor2Config(BaseModel):
     vD: float
     pP: float
     voltage_limit: float
-    velocirty_limit: float
+    velocity_limit: float
     lpfTf: float
 
 

@@ -19,7 +19,7 @@ motor:
     vD: 0.001
     pP: 20.0
     voltage_limit: 6.0
-    velocirty_limit: 10.0
+    velocity_limit: 10.0
     lpfTf: 0.01
 
   M1:
@@ -32,7 +32,7 @@ motor:
     vD: 0.001
     pP: 5.0
     voltage_limit: 6.0
-    velocirty_limit: 10.0
+    velocity_limit: 10.0
     lpfTf: 0.005
 
   M2:
@@ -45,7 +45,7 @@ motor:
     vD: 0.001
     pP: 20.0
     voltage_limit: 24.0
-    velocirty_limit: 40.0
+    velocity_limit: 40.0
     lpfTf: 0.01
 
   M3:

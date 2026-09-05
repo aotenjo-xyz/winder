@@ -436,10 +436,10 @@ class Wind:
         vD = motor_config.vD
         pP = motor_config.pP
         voltage_limit = motor_config.voltage_limit
-        velocirty_limit = motor_config.velocirty_limit
+        velocity_limit = motor_config.velocity_limit
         lpfTf = motor_config.lpfTf
         # M<motor_id>S<vP>,<vI>,<vD>,<pP>,<voltageLimit>,<velocityLimit>,<lpfTf>
-        command = f"M{motor_id}S{vP},{vI},{vD},{pP},{voltage_limit},{velocirty_limit},{lpfTf}\n"
+        command = f"M{motor_id}S{vP},{vI},{vD},{pP},{voltage_limit},{velocity_limit},{lpfTf}\n"
         if self.simulation:
             self.logger.debug(f"Simulation mode: {command.strip()}")
         else:
@@ -458,7 +458,7 @@ class Wind:
                 "vD": motor_config.vD,
                 "pP": motor_config.pP,
                 "voltage_limit": motor_config.voltage_limit,
-                "velocirty_limit": motor_config.velocirty_limit,
+                "velocity_limit": motor_config.velocity_limit,
                 "lpfTf": motor_config.lpfTf,
             }
         else:
@@ -477,7 +477,7 @@ class Wind:
                 "vD": float(params[2]),
                 "pP": float(params[3]),
                 "voltage_limit": float(params[4]),
-                "velocirty_limit": float(params[5]),
+                "velocity_limit": float(params[5]),
                 "lpfTf": float(params[6]),
             }
 
